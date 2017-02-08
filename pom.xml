@@ -10,6 +10,7 @@
     <name>EasyHttpConsole</name>
     <description>A simple web-based console interface</description>
     <version>1.0.0</version>
+    <url>https://github.com/Fylipp/EasyHttpConsole</url>
     <packaging>jar</packaging>
 
     <licenses>
@@ -48,4 +49,14 @@
             <version>0.4.15</version>
         </dependency>
     </dependencies>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
