@@ -6,10 +6,10 @@
 
     <groupId>com.pploder</groupId>
     <artifactId>easy-http-console</artifactId>
+    <version>1.0.0</version>
 
     <name>EasyHttpConsole</name>
     <description>A simple web-based console interface</description>
-    <version>1.0.0</version>
     <url>https://github.com/Fylipp/EasyHttpConsole</url>
     <packaging>jar</packaging>
 
@@ -59,4 +59,18 @@
             </plugin>
         </plugins>
     </reporting>
+
+    <scm>
+        <connection>scm:git:git://github.com/Fylipp/EasyHttpConsole.git</connection>
+        <developerConnection>scm:git:ssh://github.com:Fylipp/EasyHttpConsole.git</developerConnection>
+        <url>http://github.com/Fylipp/EasyHttpConsole/tree/master</url>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <name>Philipp Ploder's Maven Repo</name>
+            <id>philipp-ploders-maven-repo</id>
+            <url>https://philipp-ploders-maven-repo.appspot.com/</url>
+        </repository>
+    </distributionManagement>
 </project>
