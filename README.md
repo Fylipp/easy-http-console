@@ -19,8 +19,23 @@ After running your program, you can open your browser and go to `localhost:8080`
 ![Screenshot of the example](http://imgur.com/oRUxFnB.png)
 
 ## How do I get it?
-You can obtain pre-built JARs in the `Releases` tab or clone the repository and compile it yourself.
+You can obtain pre-built JARs in the `Releases` tab or clone the repository and compile it yourself. Alternatively you can add it as a Maven dependency:
+```xml
+<dependency>
+    <groupId>com.pploder</groupId>
+    <artifactId>easy-http-console</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+**Note:** The Maven repository is hosted on a custom server. In order to have access you have to add the following repository to your repositories:
+```xml
+<repository>
+    <name>Philipp Ploder's Maven Repo</name>
+    <id>philipp-ploders-maven-repo</id>
+    <url>https://philipp-ploders-maven-repo.appspot.com/</url>
+</repository>
+```
 
 ## What am I allowed to do with it?
-**EasyHttpConsole** is released under the MIT license. A short summary of the license can be found [here](https://tldrlegal.com/license/mit-license) (note that the summary is 
+**EasyHttpConsole** is released under the [MIT license](https://tldrlegal.com/license/mit-license) (note that the summary is 
 not a replacement of the full license and holds no legal value). The full license can be found in the `LICENSE` file which is located in the root folder of the repository.
