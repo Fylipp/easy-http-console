@@ -8,9 +8,9 @@
     <artifactId>easy-http-console</artifactId>
     <version>1.0.0</version>
 
-    <name>EasyHttpConsole</name>
+    <name>easy-http-console</name>
     <description>A simple web-based console interface</description>
-    <url>https://github.com/Fylipp/EasyHttpConsole</url>
+    <url>https://github.com/Fylipp/easy-http-console</url>
     <packaging>jar</packaging>
 
     <licenses>

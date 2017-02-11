@@ -1,4 +1,4 @@
-**EasyHttpConsole** is a simple library for easily adding console interfaces that can be accessed via the web to applications. The user interface is served via HTTP and the 
+**easy-http-console** is a simple library for easily adding console interfaces that can be accessed via the web to applications. The user interface is served via HTTP and the 
    commands and responses are sent other websockets.
    
 ## How do I use it?
@@ -42,5 +42,5 @@ and use it. Because of this you have to add a custom repository to your POM.
 ```
 
 ## What am I allowed to do with it?
-**EasyHttpConsole** is released under the [MIT license](https://tldrlegal.com/license/mit-license) (note that the summary is 
+**easy-http-console** is released under the [MIT license](https://tldrlegal.com/license/mit-license) (note that the summary is 
 not a replacement of the full license and holds no legal value). The full license can be found in the `LICENSE` file which is located in the root folder of the repository.
