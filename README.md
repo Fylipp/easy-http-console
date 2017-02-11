@@ -27,8 +27,8 @@ and use it. Because of this you have to add a custom repository to your POM.
 <dependencies>
     <dependency>
         <groupId>com.github.Fylipp</groupId>
-        <artifactId>EasyHttpConsole</artifactId>
-        <version>v1.0.0</version>
+        <artifactId>easy-http-console</artifactId>
+        <version>v1.0.2</version>
     </dependency>
 </dependency>
 ```

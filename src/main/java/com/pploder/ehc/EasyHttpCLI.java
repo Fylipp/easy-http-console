@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class EasyHttpCLI extends AbstractHttpConsole implements CommandRegistry {
 
-    public static final CommandHandler DEFAULT_UNKNOWN_COMMAND_HANDLER = cmd -> cmd.getSource().getConnection().send("[EasyHttpConsole] Unknown command: " + cmd.getName());
+    public static final CommandHandler DEFAULT_UNKNOWN_COMMAND_HANDLER = cmd -> cmd.getSource().getConnection().send("[easy-http-console] Unknown command: " + cmd.getName());
 
     private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
 

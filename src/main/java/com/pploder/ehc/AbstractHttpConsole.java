@@ -38,7 +38,7 @@ public abstract class AbstractHttpConsole implements HttpConsole {
     /**
      * The default message handler. It simply sends a message stating that this is the default behaviour.
      */
-    public static final MessageHandler DEFAULT_MESSAGE_HANDLER = msg -> msg.getConnection().send("[EasyHttpConsole] This is the default message handler");
+    public static final MessageHandler DEFAULT_MESSAGE_HANDLER = msg -> msg.getConnection().send("[easy-http-console] This is the default message handler");
 
     private final String host;
     private final int port;
