@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="easyhttpconsole" />
+        <module name="easy-http-console" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="easyhttpconsole" target="1.8" />
+      <module name="easy-http-console" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
