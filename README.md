@@ -19,21 +19,26 @@ After running your program, you can open your browser and go to `localhost:8080`
 ![Screenshot of the example](http://imgur.com/oRUxFnB.png)
 
 ## How do I get it?
-You can obtain pre-built JARs in the `Releases` tab or clone the repository and compile it yourself. Alternatively you can add it as a Maven dependency:
+You can obtain pre-built JARs in the `Releases` tab or clone the repository and compile it yourself.
+ 
+Alternatively you can add it as a Maven dependency. **Note:** The Maven dependency is a 'fake' dependency which uses [JitPack](https://jitpack.io/) to fetch the git repository 
+and use it. Because of this you have to add a custom repository to your POM.
 ```xml
-<dependency>
-    <groupId>com.pploder</groupId>
-    <artifactId>easy-http-console</artifactId>
-    <version>1.0.0</version>
+<dependencies>
+    <dependency>
+        <groupId>com.github.Fylipp</groupId>
+        <artifactId>EasyHttpConsole</artifactId>
+        <version>v1.0.0</version>
+    </dependency>
 </dependency>
 ```
-**Note:** The Maven repository is hosted on a custom server. In order to have access you have to add the following repository to your repositories:
 ```xml
-<repository>
-    <name>Philipp Ploder's Maven Repo</name>
-    <id>philipp-ploders-maven-repo</id>
-    <url>https://philipp-ploders-maven-repo.appspot.com/</url>
-</repository>
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
 ```
 
 ## What am I allowed to do with it?
