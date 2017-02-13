@@ -1,5 +1,5 @@
 **easy-http-console** is a simple library for easily adding console interfaces that can be accessed via the web to applications. The user interface is served via HTTP and the 
-   commands and responses are sent other websockets.
+   commands and responses are sent over websockets.
    
 ## How do I use it?
 This is a simple code snippet to get you started:
