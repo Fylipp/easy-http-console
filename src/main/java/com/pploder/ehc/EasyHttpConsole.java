@@ -4,16 +4,18 @@ import org.webbitserver.WebServer;
 import org.webbitserver.WebServers;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A console that is accessible via HTTP and communicates via a websocket.
+ * The default implementation of {@link HttpConsole}.
  *
  * @author Philipp Ploder
- * @version 1.0.0
- * @since 1.0.0
+ * @version 2.0.0
+ * @since 2.0.0
  */
-public abstract class AbstractHttpConsole implements HttpConsole {
+public class EasyHttpConsole implements HttpConsole {
 
     /**
      * The URI of the websocket.
@@ -35,25 +37,20 @@ public abstract class AbstractHttpConsole implements HttpConsole {
      */
     public static final String DEFAULT_HOST = "localhost";
 
-    /**
-     * The default message handler. It simply sends a message stating that this is the default behaviour.
-     */
-    public static final MessageHandler DEFAULT_MESSAGE_HANDLER = msg -> msg.getConnection().send("[easy-http-console] This is the default message handler");
-
     private final String host;
     private final int port;
 
     private final WebServer server;
     private final ConsoleWebSocketHandler webSocketHandler;
 
-    private MessageHandler messageHandler;
+    private final List<MessageListener> messageListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new instance using the default host and port.
      *
      * @throws IOException If something goes wrong whilst creating the web server.
      */
-    public AbstractHttpConsole() throws IOException {
+    public EasyHttpConsole() throws IOException {
         this(DEFAULT_PORT);
     }
 
@@ -63,7 +60,7 @@ public abstract class AbstractHttpConsole implements HttpConsole {
      * @param port The port to run the server on.
      * @throws IOException If something goes wrong whilst creating the web server.
      */
-    public AbstractHttpConsole(int port) throws IOException {
+    public EasyHttpConsole(int port) throws IOException {
         this(DEFAULT_HOST, port);
     }
 
@@ -74,7 +71,7 @@ public abstract class AbstractHttpConsole implements HttpConsole {
      * @param port The port to run the server on.
      * @throws IOException If something goes wrong whilst creating the web server.
      */
-    public AbstractHttpConsole(String host, int port) throws IOException {
+    public EasyHttpConsole(String host, int port) throws IOException {
         this.host = host;
         this.port = port;
 
@@ -86,7 +83,7 @@ public abstract class AbstractHttpConsole implements HttpConsole {
     }
 
     @Override
-    public void start() throws ExecutionException, InterruptedException {
+    public void start() throws Exception {
         server.start().get();
     }
 
@@ -108,6 +105,27 @@ public abstract class AbstractHttpConsole implements HttpConsole {
     @Override
     public String getHttpURL() {
         return "http://" + getHost() + ":" + getPort() + "/";
+    }
+
+    @Override
+    public void addMessageListener(MessageListener messageListener) throws NullPointerException {
+        messageListeners.add(Objects.requireNonNull(messageListener));
+    }
+
+    @Override
+    public void removeMessageListener(MessageListener messageListener) throws NullPointerException {
+        messageListeners.remove(Objects.requireNonNull(messageListener));
+    }
+
+    @Override
+    public void supplyMessage(Message message) {
+        for (MessageListener messageListener : messageListeners) {
+            try {
+                messageListener.accept(message);
+            } catch (Exception e) {
+                // Suppress
+            }
+        }
     }
 
     @Override

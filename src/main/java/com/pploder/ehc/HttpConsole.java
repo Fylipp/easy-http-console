@@ -4,10 +4,11 @@ package com.pploder.ehc;
  * A console that is provided via HTTP.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface HttpConsole extends AutoCloseable {
+
     /**
      * Starts the console.
      *
@@ -36,9 +37,27 @@ public interface HttpConsole extends AutoCloseable {
     String getHttpURL();
 
     /**
-     * @return The message handler of the console.
+     * Adds a message listener,
+     *
+     * @param messageListener The message listener.
+     * @throws NullPointerException If the given reference is {@code null}.
      */
-    MessageHandler getMessageHandler();
+    void addMessageListener(MessageListener messageListener) throws NullPointerException;
+
+    /**
+     * Removes the message listener.
+     *
+     * @param messageListener The message listener.
+     * @throws NullPointerException If the given reference is {@code null}.
+     */
+    void removeMessageListener(MessageListener messageListener) throws NullPointerException;
+
+    /**
+     * Supplies the object with a message that will be processed by the appropriate listeners.
+     *
+     * @param message The message.
+     */
+    void supplyMessage(Message message);
 
     /**
      * Stops the console.
@@ -46,4 +65,5 @@ public interface HttpConsole extends AutoCloseable {
      * @throws Exception If something goes wrong.
      */
     void close() throws Exception;
+
 }

@@ -6,93 +6,65 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * An {@link AbstractHttpConsole} with command-line functionality.
+ * An {@link EasyHttpConsole} with command-line functionality.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-public class EasyHttpCLI extends AbstractHttpConsole implements CommandRegistry {
+public class EasyHttpCLI extends EasyHttpConsole implements HttpCLI {
 
-    public static final CommandHandler DEFAULT_UNKNOWN_COMMAND_HANDLER = cmd -> cmd.getSource().getConnection().send("[easy-http-console] Unknown command: " + cmd.getName());
+    /**
+     * The default unknown command listener.
+     */
+    public static final CommandListener DEFAULT_UNKNOWN_COMMAND_LISTENER = cmd -> cmd.getSource().getConnection().send("Unknown command: " + cmd.getName());
 
-    private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
+    private final Map<String, CommandListener> commandListeners = new HashMap<>();
 
-    private CommandHandler unknownCommandHandler;
+    private CommandListener unknownCommandListener;
 
     /**
      * Creates a new instance using the default unknown command handler.
+     * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
      *
      * @throws IOException If such an exception is thrown by the super-constructor.
      */
     public EasyHttpCLI() throws IOException {
-        this(DEFAULT_UNKNOWN_COMMAND_HANDLER);
-    }
-
-    /**
-     * Creates a new instance using the given unknown command handler.
-     *
-     * @param unknownCommandHandler The command handler to use when an incoming command is unrecognized.
-     * @throws IOException If such an exception is thrown by the super-constructor.
-     */
-    public EasyHttpCLI(CommandHandler unknownCommandHandler) throws IOException {
         super();
-        this.unknownCommandHandler = unknownCommandHandler;
+        sharedSetup();
     }
 
     /**
      * Creates a new instance using the given port.
+     * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
      *
      * @param port The port to provide the console on.
      * @throws IOException If such an exception is thrown by the super-constructor.
      */
     public EasyHttpCLI(int port) throws IOException {
-        this(port, DEFAULT_UNKNOWN_COMMAND_HANDLER);
-    }
-
-    /**
-     * Creates a new instance using the given port and unknown command handler.
-     *
-     * @param port                  The port to provide the console on.
-     * @param unknownCommandHandler The command handler to use when an incoming command is unrecognized.
-     * @throws IOException If such an exception is thrown by the super-constructor.
-     */
-    public EasyHttpCLI(int port, CommandHandler unknownCommandHandler) throws IOException {
         super(port);
-        this.unknownCommandHandler = unknownCommandHandler;
+        sharedSetup();
     }
 
     /**
      * Creates a new instance using the given host and port.
+     * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
      *
      * @param host The host to provide the console on.
      * @param port The port to provide the console on.
      * @throws IOException If such an exception is thrown by the super-constructor.
      */
     public EasyHttpCLI(String host, int port) throws IOException {
-        this(host, port, DEFAULT_UNKNOWN_COMMAND_HANDLER);
-    }
-
-    /**
-     * Creates a new instance using the given host, port and unknown command handler.
-     *
-     * @param host                  The host to provide the console on.
-     * @param port                  The port to provide the console on.
-     * @param unknownCommandHandler The command handler to use when an incoming command is unrecognized.
-     * @throws IOException If such an exception is thrown by the super-constructor.
-     */
-    public EasyHttpCLI(String host, int port, CommandHandler unknownCommandHandler) throws IOException {
         super(host, port);
-        this.unknownCommandHandler = unknownCommandHandler;
+        sharedSetup();
     }
 
-    /**
-     * Handles incoming messages.
-     * This method is returned as a {@link MessageHandler} by {@link #getMessageHandler()}.
-     *
-     * @param message The incoming message.
-     */
-    private void handleMessage(Message message) {
+    private void sharedSetup() {
+        addMessageListener(this::messageHandler);
+        setUnknownCommandListener(DEFAULT_UNKNOWN_COMMAND_LISTENER);
+    }
+
+    private void messageHandler(Message message) {
         List<String> split = ArgumentTokenizer.tokenize(message.getMessage());
 
         String[] args = new String[split.size() - 1];
@@ -110,64 +82,44 @@ public class EasyHttpCLI extends AbstractHttpConsole implements CommandRegistry 
 
         Command cmd = new EasyCommand(message, split.get(0), args);
 
-        CommandHandler commandHandler = getCommandHandler(cmd.getName());
-        if (commandHandler == null) {
-            CommandHandler fallback = getUnknownCommandHandler();
+        CommandListener commandListener = getCommandHandler(cmd.getName());
+        if (commandListener == null) {
+            CommandListener fallback = getUnknownCommandListener();
             if (fallback != null) {
                 fallback.accept(cmd);
             }
         } else {
-            commandHandler.accept(cmd);
+            commandListener.accept(cmd);
         }
     }
 
     @Override
+    public void registerCommandListener(String command, CommandListener commandListener) {
+        commandListeners.put(Objects.requireNonNull(command), Objects.requireNonNull(commandListener));
+    }
+
+    @Override
+    public void removeCommandListener(String command) {
+        commandListeners.remove(Objects.requireNonNull(command));
+    }
+
+    @Override
     public Iterable<String> registeredCommands() {
-        return commandHandlers.keySet();
+        return commandListeners.keySet();
     }
 
     @Override
-    public CommandHandler getCommandHandler(String command) {
-        return commandHandlers.get(command);
+    public CommandListener getCommandHandler(String command) {
+        return commandListeners.get(Objects.requireNonNull(command));
     }
 
     @Override
-    public CommandHandler getUnknownCommandHandler() {
-        return unknownCommandHandler;
-    }
-
-    /**
-     * Sets the unknown command handler.
-     *
-     * @param unknownCommandHandler The new unknown command handler.
-     */
-    public void setUnknownCommandHandler(CommandHandler unknownCommandHandler) {
-        this.unknownCommandHandler = Objects.requireNonNull(unknownCommandHandler);
+    public CommandListener getUnknownCommandListener() {
+        return unknownCommandListener;
     }
 
     @Override
-    public MessageHandler getMessageHandler() {
-        return this::handleMessage;
-    }
-
-    /**
-     * Sets the command handler for a command.
-     * This will overwrite any previous command handler.
-     *
-     * @param command        The command for which the handler should be set.
-     * @param commandHandler The command handler.
-     */
-    public void registerCommandHandler(String command, CommandHandler commandHandler) {
-        commandHandlers.put(Objects.requireNonNull(command), Objects.requireNonNull(commandHandler));
-    }
-
-    /**
-     * Removes the command handler for the given command.
-     *
-     * @param command The command for which the handler should be removed.
-     * @return The removed command handler, if there was one, otherwise {@code null}.
-     */
-    public CommandHandler removeCommandHandler(String command) {
-        return commandHandlers.remove(command);
+    public void setUnknownCommandListener(CommandListener unknownCommandListener) {
+        this.unknownCommandListener = Objects.requireNonNull(unknownCommandListener);
     }
 }
