@@ -3,26 +3,21 @@ package com.pploder.ehc;
 import org.webbitserver.BaseWebSocketHandler;
 import org.webbitserver.WebSocketConnection;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Hosts the websocket for console communication.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
-    public static final MessageHandler DEFAULT_MESSAGE_HANDLER = message -> {
-        message.getConnection().send("[AbstractHttpConsole] No message handler has been set.");
-        message.getConnection().close();
-    };
-
     private final HttpConsole server;
 
-    private final List<WebSocketConnection> connections = new ArrayList<>();
+    private final List<WebSocketConnection> connections = new CopyOnWriteArrayList<>();
 
     public ConsoleWebSocketHandler(HttpConsole server) {
         this.server = server;
@@ -40,14 +35,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onMessage(WebSocketConnection connection, String msg) throws Throwable {
-        MessageHandler messageHandler = getHttpConsole().getMessageHandler();
-        Message message = new EasyMessage(getHttpConsole(), connection, msg);
-
-        if (messageHandler == null) {
-            DEFAULT_MESSAGE_HANDLER.accept(message);
-        } else {
-            messageHandler.accept(message);
-        }
+        server.supplyMessage(new EasyMessage(getHttpConsole(), connection, msg));
     }
 
     /**
@@ -55,6 +43,13 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
      */
     public HttpConsole getHttpConsole() {
         return server;
+    }
+
+    /**
+     * @return The amount of active connection.
+     */
+    public int getConnectionCount() {
+        return connections.size();
     }
 
     /**
