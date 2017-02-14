@@ -1,12 +1,10 @@
 package com.pploder.ehc;
 
-import org.webbitserver.WebSocketConnection;
-
 /**
- * Represents input received from a {@link WebSocketConnection} belonging to a {@link HttpConsole}.
+ * Represents input received from a {@link Connection} belonging to a {@link HttpConsole}.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public interface Message {
@@ -18,7 +16,7 @@ public interface Message {
     /**
      * @return The connection from which the message originated.
      */
-    WebSocketConnection getConnection();
+    Connection getConnection();
 
     /**
      * @return The message in a trimmed form.

@@ -1,20 +1,18 @@
 package com.pploder.ehc;
 
-import org.webbitserver.WebSocketConnection;
-
 import java.util.Objects;
 
 /**
  * The default implementation of the {@link Message} interface.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class EasyMessage implements Message {
 
     private final HttpConsole server;
-    private final WebSocketConnection connection;
+    private final Connection connection;
     private final String message;
 
     /**
@@ -25,7 +23,7 @@ public class EasyMessage implements Message {
      * @param connection The connection from which the message originates.
      * @param message    The message itself.
      */
-    public EasyMessage(HttpConsole server, WebSocketConnection connection, String message) {
+    public EasyMessage(HttpConsole server, Connection connection, String message) {
         this.server = Objects.requireNonNull(server);
         this.connection = Objects.requireNonNull(connection);
         this.message = Objects.requireNonNull(message).trim();
@@ -37,7 +35,7 @@ public class EasyMessage implements Message {
     }
 
     @Override
-    public WebSocketConnection getConnection() {
+    public Connection getConnection() {
         return connection;
     }
 

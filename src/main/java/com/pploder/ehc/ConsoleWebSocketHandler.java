@@ -3,8 +3,8 @@ package com.pploder.ehc;
 import org.webbitserver.BaseWebSocketHandler;
 import org.webbitserver.WebSocketConnection;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Hosts the websocket for console communication.
@@ -17,7 +17,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
     private final HttpConsole server;
 
-    private final List<WebSocketConnection> connections = new CopyOnWriteArrayList<>();
+    private final Map<WebSocketConnection, Connection> connections = new ConcurrentHashMap<>();
 
     public ConsoleWebSocketHandler(HttpConsole server) {
         this.server = server;
@@ -25,7 +25,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onOpen(WebSocketConnection connection) throws Exception {
-        connections.add(connection);
+        connections.put(connection, new WebSocketConnectionWrapper(server, connection));
     }
 
     @Override
@@ -35,7 +35,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onMessage(WebSocketConnection connection, String msg) throws Throwable {
-        server.supplyMessage(new EasyMessage(getHttpConsole(), connection, msg));
+        server.supplyMessage(new EasyMessage(getHttpConsole(), connections.get(connection), msg));
     }
 
     /**
@@ -55,7 +55,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
     /**
      * @return All active connections.
      */
-    public Iterable<WebSocketConnection> getConnections() {
-        return connections;
+    public Iterable<Connection> getConnections() {
+        return connections.values();
     }
 }
