@@ -155,26 +155,26 @@
 
             logAutoHeight();
             state('connecting');
-            log('meta', 'Connecting to {{WEBSOCKET}} ...');
+            log('meta', [{text: 'Connecting to {{WEBSOCKET}} ...'}]);
 
             ws = new WebSocket('{{WEBSOCKET}}');
 
             ws.onerror = function (event) {
-                log('err', 'Websocket error');
+                log('err', [{text: 'Websocket error.'}]);
             };
 
             ws.onopen = function (event) {
                 state('ready');
-                log('meta', 'Ready.');
+                log('meta', [{text: 'Ready'}]);
             };
 
             ws.onclose = function (event) {
                 state('closed');
-                log('meta', 'Connection closed.');
+                log('meta', [{text: 'Connection closed.'}]);
             };
 
             ws.onmessage = function (event) {
-                log('msg', event.data);
+                log('msg', JSON.parse(event.data));
             };
         });
 
@@ -188,7 +188,7 @@
                 return;
             }
 
-            log('cmd', msg);
+            log('cmd', [{text: msg}]);
 
             ws.send(msg);
         }
@@ -214,12 +214,51 @@
             }
         }
 
-        function log(type, text) {
+        function log(type, data) {
             var item = document.createElement('li');
-            item.appendChild(document.createTextNode(text));
-
             item.setAttribute('class', 'log-item');
             item.setAttribute('data-type', type);
+
+            for (var i = 0; i < data.length; i++) {
+                var info = data[i];
+
+                var snippet = document.createElement('span');
+                snippet.appendChild(document.createTextNode(info.text));
+
+                if (info.underlined != undefined && typeof info.underlined === "boolean") {
+                    snippet.style.textDecoration = "underline";
+
+                    console.log(snippet.style.textDecoration);
+
+                    if (info.strikethrough != undefined && typeof info.strikethrough === "boolean") {
+                        var tmp = document.createElement('span');
+                        tmp.style.textDecoration = "line-through";
+                        tmp.appendChild(snippet);
+                        snippet = tmp;
+
+                        console.log(snippet.style.textDecoration);
+                    }
+                } else if (info.strikethrough != undefined && typeof info.strikethrough === "boolean") {
+                    snippet.style.textDecoration = "line-through";
+                }
+
+                if (info.bold != undefined && typeof info.bold === "boolean") {
+                    snippet.style.fontWeight = info.bold ? "600" : "300";
+                }
+
+                if (info.italic != undefined && typeof info.italic === "boolean") {
+                    snippet.style.fontStyle = info.italic ? "italic" : "normal";
+                }
+
+                if (info.color != undefined) {
+                    snippet.style.color = "rgb(" +
+                        parseInt(info.color[0]) + ", " +
+                        parseInt(info.color[1]) + ", " +
+                        parseInt(info.color[2]) + ")";
+                }
+
+                item.appendChild(snippet);
+            }
 
             var log = document.getElementById('log');
             log.appendChild(item);
@@ -233,7 +272,8 @@
 <div id="page-content">
     <header id="header">
         <p id="title">{{ADDRESS}}</p>
-        <p id="subtitle">Powered by <a id="link" href="https://github.com/Fylipp/easy-http-console/">easy-http-console</a></p>
+        <p id="subtitle">Powered by <a id="link"
+                                       href="https://github.com/Fylipp/easy-http-console/">easy-http-console</a></p>
     </header>
 
     <ul id="log">
