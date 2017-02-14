@@ -157,21 +157,21 @@
 
             ws.onerror = function (event) {
                 log('err', 'Websocket error');
-            }
+            };
 
             ws.onopen = function (event) {
                 state('ready');
                 log('meta', 'Ready.');
-            }
+            };
 
             ws.onclose = function (event) {
                 state('closed');
                 log('meta', 'Connection closed.');
-            }
+            };
 
             ws.onmessage = function (event) {
                 log('msg', event.data);
-            }
+            };
         });
 
         function send() {
@@ -229,16 +229,14 @@
 <div id="page-content">
     <header id="header">
         <p id="title">{{ADDRESS}}</p>
-        <p id="subtitle">Powered by <a id="link"
-                                       href="https://github.com/Fylipp/easy-http-console/">easy-http-console</a></p>
+        <p id="subtitle">Powered by <a id="link" href="https://github.com/Fylipp/easy-http-console/">easy-http-console</a></p>
     </header>
 
     <ul id="log">
     </ul>
 
     <footer id="footer">
-        <input id="input" type="text"
-               onkeydown="if (event.keyCode == 13) { send(); return false; }"
+        <input id="input" type="text" onkeydown="if (event.keyCode == 13) { send(); return false; }"
                autocorrect="off" autocapitalize="off" spellcheck="false">
         <p>This page was served on {{SERVED}}.</p>
     </footer>
