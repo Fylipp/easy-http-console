@@ -66,4 +66,14 @@ public interface HttpConsole extends AutoCloseable {
      */
     void close() throws Exception;
 
+    /**
+     * @return The amount of active connections.
+     */
+    int getConnectionCount();
+
+    /**
+     * @return All active connections.
+     */
+    Iterable<Connection> getConnections();
+
 }

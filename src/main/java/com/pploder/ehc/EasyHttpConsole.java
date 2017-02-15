@@ -132,4 +132,14 @@ public class EasyHttpConsole implements HttpConsole {
     public void close() throws IOException {
         server.stop();
     }
+
+    @Override
+    public int getConnectionCount() {
+        return webSocketHandler.getConnectionCount();
+    }
+
+    @Override
+    public Iterable<Connection> getConnections() {
+        return webSocketHandler.getConnections();
+    }
 }
