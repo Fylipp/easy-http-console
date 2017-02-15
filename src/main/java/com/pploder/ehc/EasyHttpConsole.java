@@ -4,9 +4,6 @@ import org.webbitserver.WebServer;
 import org.webbitserver.WebServers;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The default implementation of {@link HttpConsole}.
@@ -15,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class EasyHttpConsole implements HttpConsole {
+public class EasyHttpConsole extends AbstractHttpConsole {
 
     /**
      * The URI of the websocket.
@@ -37,13 +34,8 @@ public class EasyHttpConsole implements HttpConsole {
      */
     public static final String DEFAULT_HOST = "localhost";
 
-    private final String host;
-    private final int port;
-
     private final WebServer server;
     private final ConsoleWebSocketHandler webSocketHandler;
-
-    private final List<MessageListener> messageListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new instance using the default host and port.
@@ -72,8 +64,8 @@ public class EasyHttpConsole implements HttpConsole {
      * @throws IOException If something goes wrong whilst creating the web server.
      */
     public EasyHttpConsole(String host, int port) throws IOException {
-        this.host = host;
-        this.port = port;
+        super(port, host, "http://" + host + ":" + port + "/",
+                "ws://" + host + ":" + port + "/ws");
 
         webSocketHandler = new ConsoleWebSocketHandler(this);
 
@@ -85,47 +77,6 @@ public class EasyHttpConsole implements HttpConsole {
     @Override
     public void start() throws Exception {
         server.start().get();
-    }
-
-    @Override
-    public String getHost() {
-        return host;
-    }
-
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    @Override
-    public String getWebsocketURL() {
-        return "ws://" + getHost() + ":" + getPort() + "/ws";
-    }
-
-    @Override
-    public String getHttpURL() {
-        return "http://" + getHost() + ":" + getPort() + "/";
-    }
-
-    @Override
-    public void addMessageListener(MessageListener messageListener) throws NullPointerException {
-        messageListeners.add(Objects.requireNonNull(messageListener));
-    }
-
-    @Override
-    public void removeMessageListener(MessageListener messageListener) throws NullPointerException {
-        messageListeners.remove(Objects.requireNonNull(messageListener));
-    }
-
-    @Override
-    public void supplyMessage(Message message) {
-        for (MessageListener messageListener : messageListeners) {
-            try {
-                messageListener.accept(message);
-            } catch (Exception e) {
-                // Suppress
-            }
-        }
     }
 
     @Override
