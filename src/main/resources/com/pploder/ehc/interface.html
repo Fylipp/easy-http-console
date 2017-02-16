@@ -228,15 +228,11 @@
                 if (info.underlined != undefined && typeof info.underlined === "boolean") {
                     snippet.style.textDecoration = "underline";
 
-                    console.log(snippet.style.textDecoration);
-
                     if (info.strikethrough != undefined && typeof info.strikethrough === "boolean") {
                         var tmp = document.createElement('span');
                         tmp.style.textDecoration = "line-through";
                         tmp.appendChild(snippet);
                         snippet = tmp;
-
-                        console.log(snippet.style.textDecoration);
                     }
                 } else if (info.strikethrough != undefined && typeof info.strikethrough === "boolean") {
                     snippet.style.textDecoration = "line-through";
