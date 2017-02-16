@@ -88,7 +88,7 @@ public class MessageSnippet {
     public JSONObject asJSON() {
         JSONObject object = new JSONObject();
 
-        object.put(JSON_TEXT, JSONObject.escape(getText()));
+        object.put(JSON_TEXT, getText());
 
         Color colorOverride = getColorOverride();
         if (colorOverride != null) {
