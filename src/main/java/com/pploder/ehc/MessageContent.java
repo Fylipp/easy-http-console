@@ -120,9 +120,9 @@ public class MessageContent implements Iterable<MessageSnippet> {
             Color colorOverride = snippet.getColorOverride();
             if (colorOverride != null) {
                 JSONArray rgb = new JSONArray();
-                rgb.add(colorOverride.getRed());
-                rgb.add(colorOverride.getGreen());
-                rgb.add(colorOverride.getBlue());
+                rgb.add((int) (colorOverride.getRed() * 255));
+                rgb.add((int) (colorOverride.getGreen() * 255));
+                rgb.add((int) (colorOverride.getBlue() * 255));
 
                 object.put(JSON_COLOR, rgb);
             }
