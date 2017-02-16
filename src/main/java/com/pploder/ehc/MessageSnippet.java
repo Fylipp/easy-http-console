@@ -1,6 +1,8 @@
 package com.pploder.ehc;
 
 import javafx.scene.paint.Color;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.Objects;
 
@@ -13,6 +15,13 @@ import java.util.Objects;
  * @since 2.0.0
  */
 public class MessageSnippet {
+
+    private static final String JSON_TEXT = "text";
+    private static final String JSON_COLOR = "color";
+    private static final String JSON_BOLD = "bold";
+    private static final String JSON_ITALIC = "italic";
+    private static final String JSON_UNDERLINED = "underlined";
+    private static final String JSON_STRIKETHROUGH = "strikethrough";
 
     private final String text;
     private final Color colorOverride;
@@ -72,6 +81,67 @@ public class MessageSnippet {
     }
 
     /**
+     * Generates a JSON object from a snippet.
+     *
+     * @return The snippet as a JSON object.
+     */
+    public JSONObject asJSON() {
+        JSONObject object = new JSONObject();
+
+        object.put(JSON_TEXT, JSONObject.escape(getText()));
+
+        Color colorOverride = getColorOverride();
+        if (colorOverride != null) {
+            JSONArray rgb = new JSONArray();
+            rgb.add((int) (colorOverride.getRed() * 255));
+            rgb.add((int) (colorOverride.getGreen() * 255));
+            rgb.add((int) (colorOverride.getBlue() * 255));
+
+            object.put(JSON_COLOR, rgb);
+        }
+
+        Boolean boldOverride = getBoldOverride();
+        if (boldOverride != null) {
+            object.put(JSON_BOLD, boldOverride.booleanValue());
+        }
+
+        Boolean italicOverride = getItalicOverride();
+        if (italicOverride != null) {
+            object.put(JSON_ITALIC, italicOverride.booleanValue());
+        }
+
+        Boolean underlinedOverride = getUnderlinedOverride();
+        if (underlinedOverride != null) {
+            object.put(JSON_UNDERLINED, underlinedOverride.booleanValue());
+        }
+
+        Boolean strikethroughOverride = getStrikethroughOverride();
+        if (strikethroughOverride != null) {
+            object.put(JSON_STRIKETHROUGH, strikethroughOverride.booleanValue());
+        }
+
+        return object;
+    }
+
+    /**
+     * Generates an instance from a JSON object.
+     *
+     * @param object The JSON object.
+     * @return The generated instance.
+     */
+    public static MessageSnippet fromJSON(JSONObject object) {
+        String text = (String) object.get(JSON_TEXT);
+
+        Color colorOverride = (Color) object.get(JSON_COLOR);
+        Boolean boldOverride = (Boolean) object.get(JSON_BOLD);
+        Boolean italicOverride = (Boolean) object.get(JSON_ITALIC);
+        Boolean underlinedOverride = (Boolean) object.get(JSON_UNDERLINED);
+        Boolean strikethroughtOverride = (Boolean) object.get(JSON_STRIKETHROUGH);
+
+        return new MessageSnippet(text, colorOverride, boldOverride, italicOverride, underlinedOverride, strikethroughtOverride);
+    }
+
+    /**
      * @return The snippet text.
      */
     public final String getText() {
@@ -121,10 +191,13 @@ public class MessageSnippet {
         MessageSnippet that = (MessageSnippet) o;
 
         if (!text.equals(that.text)) return false;
-        if (colorOverride != null ? !colorOverride.equals(that.colorOverride) : that.colorOverride != null) return false;
+        if (colorOverride != null ? !colorOverride.equals(that.colorOverride) : that.colorOverride != null)
+            return false;
         if (boldOverride != null ? !boldOverride.equals(that.boldOverride) : that.boldOverride != null) return false;
-        if (italicOverride != null ? !italicOverride.equals(that.italicOverride) : that.italicOverride != null) return false;
-        if (underlinedOverride != null ? !underlinedOverride.equals(that.underlinedOverride) : that.underlinedOverride != null) return false;
+        if (italicOverride != null ? !italicOverride.equals(that.italicOverride) : that.italicOverride != null)
+            return false;
+        if (underlinedOverride != null ? !underlinedOverride.equals(that.underlinedOverride) : that.underlinedOverride != null)
+            return false;
         return strikethroughOverride != null ? strikethroughOverride.equals(that.strikethroughOverride) : that.strikethroughOverride == null;
     }
 

@@ -1,9 +1,6 @@
 package com.pploder.ehc;
 
-import javafx.scene.paint.Color;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -20,13 +17,6 @@ import java.util.function.Consumer;
  * @since 2.0.0
  */
 public class MessageContent implements Iterable<MessageSnippet> {
-
-    private static final String JSON_TEXT = "text";
-    private static final String JSON_COLOR = "color";
-    private static final String JSON_BOLD = "bold";
-    private static final String JSON_ITALIC = "italic";
-    private static final String JSON_UNDERLINED = "underlined";
-    private static final String JSON_STRIKETHROUGH = "strikethrough";
 
     private final List<MessageSnippet> snippets;
 
@@ -75,82 +65,28 @@ public class MessageContent implements Iterable<MessageSnippet> {
     }
 
     /**
-     * Deserializes an object from JSON.
+     * An iterator to stream generated instances of {@link MessageSnippet} from a JSON array.
      *
-     * @param json The JSON.
-     * @return The deserialized object.
-     * @throws Exception If something goes wrong.
+     * @param array The JSON array.
+     * @return An iterator
      */
-    public static MessageContent fromJSON(String json) throws Exception {
-        JSONParser parser = new JSONParser();
-        JSONArray array = (JSONArray) parser.parse(json);
-
-        MessageSnippet[] snippets = new MessageSnippet[array.size()];
-
-        for (int i = 0; i < snippets.length; i++) {
-            JSONObject object = (JSONObject) array.get(i);
-
-            String text = (String) object.get(JSON_TEXT);
-
-            Color colorOverride = (Color) object.get(JSON_COLOR);
-            Boolean boldOverride = (Boolean) object.get(JSON_BOLD);
-            Boolean italicOverride = (Boolean) object.get(JSON_ITALIC);
-            Boolean underlinedOverride = (Boolean) object.get(JSON_UNDERLINED);
-            Boolean strikethroughtOverride = (Boolean) object.get(JSON_STRIKETHROUGH);
-
-            snippets[i] = new MessageSnippet(text, colorOverride, boldOverride, italicOverride, underlinedOverride, strikethroughtOverride);
-        }
-
-        return new MessageContent(snippets);
+    public static Iterator<MessageSnippet> iterateFromJSON(JSONArray array) {
+        return new MessageSnippetIterator(array);
     }
 
     /**
-     * Serializes this object as JSON.
+     * Generates a JSON array from the snippets.
      *
-     * @return This object serialized as JSON.
+     * @return The snippets as a JSON array.
      */
-    public String asJSON() {
+    public JSONArray asJSON() {
         JSONArray array = new JSONArray();
 
         for (MessageSnippet snippet : this) {
-            JSONObject object = new JSONObject();
-
-            object.put(JSON_TEXT, JSONObject.escape(snippet.getText()));
-
-            Color colorOverride = snippet.getColorOverride();
-            if (colorOverride != null) {
-                JSONArray rgb = new JSONArray();
-                rgb.add((int) (colorOverride.getRed() * 255));
-                rgb.add((int) (colorOverride.getGreen() * 255));
-                rgb.add((int) (colorOverride.getBlue() * 255));
-
-                object.put(JSON_COLOR, rgb);
-            }
-
-            Boolean boldOverride = snippet.getBoldOverride();
-            if (boldOverride != null) {
-                object.put(JSON_BOLD, boldOverride.booleanValue());
-            }
-
-            Boolean italicOverride = snippet.getItalicOverride();
-            if (italicOverride != null) {
-                object.put(JSON_ITALIC, italicOverride.booleanValue());
-            }
-
-            Boolean underlinedOverride = snippet.getUnderlinedOverride();
-            if (underlinedOverride != null) {
-                object.put(JSON_UNDERLINED, underlinedOverride.booleanValue());
-            }
-
-            Boolean strikethroughOverride = snippet.getStrikethroughOverride();
-            if (strikethroughOverride != null) {
-                object.put(JSON_STRIKETHROUGH, strikethroughOverride.booleanValue());
-            }
-
-            array.add(object);
+            array.add(snippet.asJSON());
         }
 
-        return array.toJSONString();
+        return array;
     }
 
     @Override
