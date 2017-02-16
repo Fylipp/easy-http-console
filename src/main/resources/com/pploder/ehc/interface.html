@@ -48,7 +48,7 @@
             text-decoration: none;
         }
 
-        #log {
+        #log-container {
             width: 100%;
             max-height: 100%;
             margin: 0;
@@ -58,9 +58,21 @@
 
             background-color: #efefef;
             border-radius: .2em;
-
-            list-style-type: none;
             box-sizing: border-box;
+        }
+
+        #log {
+            list-style-type: none;
+            display: table;
+        }
+
+        #log, .log-item {
+            margin: 0;
+            padding: 0;
+        }
+
+        .log-item {
+            display: table-row;
         }
 
         .log-item .log-item:before {
@@ -69,6 +81,8 @@
 
         .log-item:before {
             content: '\00a0\00a0\00a0';
+            text-align: right;
+            display: table-cell;
         }
 
         .log-item[data-type='meta']:before {
@@ -132,7 +146,7 @@
         var ws;
 
         function logAutoHeight() {
-            var self = document.getElementById('log');
+            var self = document.getElementById('log-container');
 
             var viewportHeight = window.innerHeight;
             var headerHeight = document.getElementById('header').offsetHeight;
@@ -223,7 +237,25 @@
                 var info = data[i];
 
                 var snippet = document.createElement('span');
-                snippet.appendChild(document.createTextNode(info.text));
+
+                var lines = info.text.split("\n");
+                for (var j = 0; j < lines.length; j++) {
+                    if (j > 0) {
+                        snippet.appendChild(document.createElement('br'));
+                    }
+
+                    var line = lines[j];
+                    var segs = line.split(" ");
+                    for (var k = 0; k < segs.length; k++) {
+                        if (k > 0) {
+                            var br = document.createElement('span');
+                            br.innerHTML = "&nbsp;";
+                            snippet.appendChild(br);
+                        }
+
+                        snippet.appendChild(document.createTextNode(segs[k]));
+                    }
+                }
 
                 if (info.underlined != undefined && typeof info.underlined === "boolean") {
                     snippet.style.textDecoration = "underline";
@@ -272,8 +304,10 @@
                                        href="https://github.com/Fylipp/easy-http-console/">easy-http-console</a></p>
     </header>
 
-    <ul id="log">
-    </ul>
+    <div id="log-container">
+        <ul id="log">
+        </ul>
+    </div>
 
     <footer id="footer">
         <input id="input" type="text" onkeydown="if (event.keyCode == 13) { send(); return false; }"
