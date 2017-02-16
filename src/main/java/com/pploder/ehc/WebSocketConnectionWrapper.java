@@ -26,7 +26,7 @@ public class WebSocketConnectionWrapper implements Connection {
 
     @Override
     public void send(MessageContent messageContent) {
-        webSocketConnection.send(messageContent.asJSON());
+        webSocketConnection.send(messageContent.asJSON().toJSONString());
     }
 
     @Override
