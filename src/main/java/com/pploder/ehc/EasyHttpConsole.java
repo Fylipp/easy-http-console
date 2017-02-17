@@ -1,5 +1,6 @@
 package com.pploder.ehc;
 
+import lombok.extern.slf4j.XSlf4j;
 import org.webbitserver.WebServer;
 import org.webbitserver.WebServers;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
  * @version 2.0.0
  * @since 2.0.0
  */
+@XSlf4j
 public class EasyHttpConsole extends AbstractHttpConsole {
 
     /**
@@ -72,15 +74,23 @@ public class EasyHttpConsole extends AbstractHttpConsole {
         server = WebServers.createWebServer(port)
                 .add(WEBSOCKET_URI, webSocketHandler)
                 .add(new ConsoleHttpHandler(this, HTML_PATH));
+
+        log.info("Webserver created on {}:{}", host, port);
     }
 
     @Override
     public void start() throws Exception {
+        log.info("Server will be started (blocking)...");
+
         server.start().get();
+
+        log.info("Server successfully started.");
     }
 
     @Override
     public void close() throws IOException {
+        log.info("Server will be stopped (non-blocking)...");
+
         server.stop();
     }
 

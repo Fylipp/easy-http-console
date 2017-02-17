@@ -1,5 +1,7 @@
 package com.pploder.ehc;
 
+import lombok.extern.slf4j.XSlf4j;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -11,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @version 2.0.0
  * @since 2.0.0
  */
+@XSlf4j
 public abstract class AbstractHttpConsole implements HttpConsole {
 
     private final String host;
@@ -38,20 +41,26 @@ public abstract class AbstractHttpConsole implements HttpConsole {
     @Override
     public void addMessageListener(MessageListener messageListener) throws NullPointerException {
         messageListeners.add(Objects.requireNonNull(messageListener));
+
+        log.debug("Message listener added");
     }
 
     @Override
     public void removeMessageListener(MessageListener messageListener) throws NullPointerException {
         messageListeners.remove(Objects.requireNonNull(messageListener));
+
+        log.debug("Message listener removed");
     }
 
     @Override
     public void supplyMessage(Message message) {
+        log.debug("Message supplied to console: {}", message.getMessage());
+
         for (MessageListener messageListener : messageListeners) {
             try {
                 messageListener.accept(message);
             } catch (Exception e) {
-                // Suppress
+                log.catching(e);
             }
         }
     }

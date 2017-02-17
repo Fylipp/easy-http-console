@@ -2,6 +2,7 @@ package com.pploder.ehc;
 
 /**
  * A console that is provided via HTTP.
+ * The received messages can be obtained by adding a {@link MessageListener}.
  *
  * @author Philipp Ploder
  * @version 2.0.0
@@ -12,7 +13,8 @@ public interface HttpConsole extends AutoCloseable {
     /**
      * Starts the console.
      *
-     * @throws Exception If something goes wrong.
+     * @throws IllegalStateException If the object is not in a state where this action is possible.
+     * @throws Exception             If something goes wrong.
      */
     void start() throws Exception;
 
@@ -62,7 +64,8 @@ public interface HttpConsole extends AutoCloseable {
     /**
      * Stops the console.
      *
-     * @throws Exception If something goes wrong.
+     * @throws IllegalStateException If the object is not in a state where this action is possible.
+     * @throws Exception             If something goes wrong.
      */
     void close() throws Exception;
 

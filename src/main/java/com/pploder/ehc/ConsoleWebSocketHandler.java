@@ -1,5 +1,6 @@
 package com.pploder.ehc;
 
+import lombok.extern.slf4j.XSlf4j;
 import org.webbitserver.BaseWebSocketHandler;
 import org.webbitserver.WebSocketConnection;
 
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 2.0.0
  * @since 1.0.0
  */
+@XSlf4j
 class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
     private final HttpConsole server;
@@ -25,16 +27,22 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onOpen(WebSocketConnection connection) throws Exception {
+        log.debug("Websocket connection opened ({})", connection.httpRequest().remoteAddress());
+
         connections.put(connection, new WebSocketConnectionWrapper(server, connection));
     }
 
     @Override
     public void onClose(WebSocketConnection connection) throws Exception {
+        log.debug("Websocket connection closed ({})", connection.httpRequest().remoteAddress());
+
         connections.remove(connection);
     }
 
     @Override
     public void onMessage(WebSocketConnection connection, String msg) throws Throwable {
+        log.debug("Websocket message received ({}): {}", connection.httpRequest().remoteAddress(), msg);
+
         server.supplyMessage(new EasyMessage(getHttpConsole(), connections.get(connection), msg));
     }
 

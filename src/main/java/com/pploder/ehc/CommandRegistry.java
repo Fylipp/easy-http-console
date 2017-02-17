@@ -1,13 +1,20 @@
 package com.pploder.ehc;
 
 /**
- * A command-line interface that is provided over HTTP.
+ * A manager for commands.
  *
  * @author Philipp Ploder
  * @version 2.0.0
  * @since 2.0.0
  */
-public interface HttpCLI extends HttpConsole {
+public interface CommandRegistry {
+
+    /**
+     * Supplies the object with a message that will be processed by the appropriate listeners.
+     *
+     * @param message The message.
+     */
+    void supplyMessage(Message message);
 
     /**
      * Sets the command listener for a command.
@@ -16,25 +23,31 @@ public interface HttpCLI extends HttpConsole {
      * @param command         The command for which the listener should be set.
      * @param commandListener The command listener.
      */
-    void registerCommandListener(String command, CommandListener commandListener);
+    void put(String command, CommandListener commandListener);
 
     /**
      * Removes the command listener for the given command.
      *
      * @param command The command for which the listener should be removed.
      */
-    void removeCommandListener(String command);
+    void remove(String command);
 
     /**
-     * @return The commands registered.
+     * @return All the commands registered.
      */
-    Iterable<String> registeredCommands();
+    Iterable<String> commands();
 
     /**
      * @param command The command to get the listener of.
-     * @return The command listener for the given command.
+     * @return The command listener for the given command or null if not found.
      */
-    CommandListener getCommandHandler(String command);
+    CommandListener getCommandListener(String command);
+
+    /**
+     * @param command The command to get the listener of.
+     * @return The command listener for the given command or the result of {@link #getUnknownCommandListener()} if not found.
+     */
+    CommandListener getCommandListenerOrFallback(String command);
 
     /**
      * @return The command listener that is used when an incoming command is not registered.

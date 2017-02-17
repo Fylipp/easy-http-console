@@ -1,17 +1,24 @@
 package com.pploder.ehc;
 
+import lombok.extern.slf4j.XSlf4j;
 import org.webbitserver.WebSocketConnection;
 
 import java.util.Objects;
 
-public class WebSocketConnectionWrapper implements Connection {
+@XSlf4j
+class WebSocketConnectionWrapper implements Connection {
 
     private final HttpConsole httpConsole;
     private final WebSocketConnection webSocketConnection;
 
+    private final String remoteAddress;
+
     public WebSocketConnectionWrapper(HttpConsole httpConsole, WebSocketConnection webSocketConnection) {
         this.httpConsole = Objects.requireNonNull(httpConsole);
         this.webSocketConnection = Objects.requireNonNull(webSocketConnection);
+
+        remoteAddress = webSocketConnection.httpRequest().remoteAddress().toString();
+        ;
     }
 
     @Override
@@ -21,16 +28,21 @@ public class WebSocketConnectionWrapper implements Connection {
 
     @Override
     public String getRemoteAddress() {
-        return webSocketConnection.httpRequest().remoteAddress().toString();
+        return remoteAddress;
     }
 
     @Override
     public void send(MessageContent messageContent) {
-        webSocketConnection.send(messageContent.asJSON().toJSONString());
+        String jsonString = messageContent.asJSON().toJSONString();
+
+        log.debug("Sending message to <{}>: {}", getRemoteAddress(), jsonString);
+
+        webSocketConnection.send(jsonString);
     }
 
     @Override
     public void close() throws Exception {
+        log.debug("Closing connection to {}...", getRemoteAddress());
         webSocketConnection.close();
     }
 }

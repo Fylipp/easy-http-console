@@ -1,18 +1,19 @@
 package com.pploder.ehc;
 
 import edu.rice.cs.util.ArgumentTokenizer;
+import lombok.extern.slf4j.XSlf4j;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
- * An {@link EasyHttpConsole} with command-line functionality.
+ * The default implementation of {@link CommandRegistry}.
  *
  * @author Philipp Ploder
  * @version 2.0.0
  * @since 1.0.0
  */
-public class EasyHttpCLI extends EasyHttpConsole implements HttpCLI {
+@XSlf4j
+public class EasyCommandRegistry implements CommandRegistry {
 
     /**
      * The default unknown command listener.
@@ -26,45 +27,25 @@ public class EasyHttpCLI extends EasyHttpConsole implements HttpCLI {
     /**
      * Creates a new instance using the default unknown command handler.
      * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
-     *
-     * @throws IOException If such an exception is thrown by the super-constructor.
      */
-    public EasyHttpCLI() throws IOException {
-        super();
-        sharedSetup();
+    public EasyCommandRegistry() {
+        this(DEFAULT_UNKNOWN_COMMAND_LISTENER);
     }
 
     /**
      * Creates a new instance using the given port.
      * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
      *
-     * @param port The port to provide the console on.
-     * @throws IOException If such an exception is thrown by the super-constructor.
+     * @param unknownCommandListener The listener for unknown commands.
      */
-    public EasyHttpCLI(int port) throws IOException {
-        super(port);
-        sharedSetup();
+    public EasyCommandRegistry(CommandListener unknownCommandListener) {
+        setUnknownCommandListener(unknownCommandListener);
     }
 
-    /**
-     * Creates a new instance using the given host and port.
-     * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
-     *
-     * @param host The host to provide the console on.
-     * @param port The port to provide the console on.
-     * @throws IOException If such an exception is thrown by the super-constructor.
-     */
-    public EasyHttpCLI(String host, int port) throws IOException {
-        super(host, port);
-        sharedSetup();
-    }
+    @Override
+    public void supplyMessage(Message message) {
+        log.debug("Message supplied to command registry: {}", message.getMessage());
 
-    private void sharedSetup() {
-        addMessageListener(this::messageHandler);
-        setUnknownCommandListener(DEFAULT_UNKNOWN_COMMAND_LISTENER);
-    }
-
-    private void messageHandler(Message message) {
         List<String> split = ArgumentTokenizer.tokenize(message.getMessage());
 
         String[] args = new String[split.size() - 1];
@@ -80,37 +61,59 @@ public class EasyHttpCLI extends EasyHttpConsole implements HttpCLI {
             }
         }
 
-        Command cmd = new EasyCommand(message, split.get(0), args);
+        String command = split.get(0);
 
-        CommandListener commandListener = getCommandHandler(cmd.getName());
+        Command cmd = new EasyCommand(message, command, args);
+
+        CommandListener commandListener = getCommandListener(cmd.getName());
         if (commandListener == null) {
+            log.debug("Unknown command '{}', defaulting to unknown command handler (if available)", command);
+
             CommandListener fallback = getUnknownCommandListener();
             if (fallback != null) {
-                fallback.accept(cmd);
+                try {
+                    fallback.accept(cmd);
+                } catch (Exception e) {
+                    log.catching(e);
+                }
             }
         } else {
-            commandListener.accept(cmd);
+            try {
+                commandListener.accept(cmd);
+            } catch (Exception e) {
+                log.catching(e);
+            }
         }
     }
 
     @Override
-    public void registerCommandListener(String command, CommandListener commandListener) {
+    public void put(String command, CommandListener commandListener) {
         commandListeners.put(Objects.requireNonNull(command), Objects.requireNonNull(commandListener));
+
+        log.debug("New command listener set for '{}'", command);
     }
 
     @Override
-    public void removeCommandListener(String command) {
+    public void remove(String command) {
         commandListeners.remove(Objects.requireNonNull(command));
+
+        log.debug("Command listener removed for '{}'", command);
     }
 
     @Override
-    public Iterable<String> registeredCommands() {
+    public Iterable<String> commands() {
         return commandListeners.keySet();
     }
 
     @Override
-    public CommandListener getCommandHandler(String command) {
+    public CommandListener getCommandListener(String command) {
         return commandListeners.get(Objects.requireNonNull(command));
+    }
+
+    @Override
+    public CommandListener getCommandListenerOrFallback(String command) {
+        CommandListener commandListener = getCommandListener(command);
+        return commandListener == null ? getUnknownCommandListener() : commandListener;
     }
 
     @Override
@@ -121,5 +124,7 @@ public class EasyHttpCLI extends EasyHttpConsole implements HttpCLI {
     @Override
     public void setUnknownCommandListener(CommandListener unknownCommandListener) {
         this.unknownCommandListener = Objects.requireNonNull(unknownCommandListener);
+
+        log.debug("Set unknown command listener");
     }
 }

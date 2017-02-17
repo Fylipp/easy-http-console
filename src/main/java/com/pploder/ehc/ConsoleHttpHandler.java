@@ -1,6 +1,7 @@
 package com.pploder.ehc;
 
 import javafx.util.Pair;
+import lombok.extern.slf4j.Slf4j;
 import org.webbitserver.HttpControl;
 import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
@@ -21,6 +22,7 @@ import java.util.Scanner;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 class ConsoleHttpHandler implements HttpHandler {
 
     /**
@@ -76,6 +78,8 @@ class ConsoleHttpHandler implements HttpHandler {
      * @param name The resource name.
      */
     private void loadResource(String mime, String name) {
+        log.debug("Loading resource <{}>...", name);
+
         try (InputStream stream = getClass().getResourceAsStream(RESOURCE_PATH + name)) {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream(16 * 1024);
 
@@ -90,13 +94,18 @@ class ConsoleHttpHandler implements HttpHandler {
             }
 
             resources.put("/" + name, new Pair<>(mime, bytes.toByteArray()));
+
+            log.debug("Successfully loaded resource <{}> ({} bytes).", name, bytes.size());
         } catch (IOException e) {
             // The exception is suppressed as further handling of an I/O error is not intended
+            log.warn("Failed to load resource <{}>", name, mime);
         }
     }
 
     @Override
     public void handleHttpRequest(HttpRequest httpRequest, HttpResponse httpResponse, HttpControl httpControl) throws Exception {
+        log.debug("HTTP request of '{}' ({})", httpRequest.uri(), httpRequest.method());
+
         String uri = httpRequest.uri();
         if (uri.equals("/")) {
             httpResponse
@@ -108,12 +117,14 @@ class ConsoleHttpHandler implements HttpHandler {
             Pair<String, byte[]> r = resources.get(uri);
 
             if (r == null) {
+                log.debug("Requested URI not registered as resource; sending 404 ({})", uri);
                 httpResponse
                         .status(404)
                         .header("Content-Type", "text/html")
                         .content("<?DOCTYPE html><html><head><title>404</title><meta charset=\"utf-8\"></head><body><h1>404: Resource not found</h1></body></html>")
                         .end();
             } else {
+                log.debug("Requested URI registered as resource; sending 200 ({})", uri);
                 httpResponse
                         .status(200)
                         .header("Content-Type", r.getKey())
