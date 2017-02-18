@@ -291,7 +291,8 @@
             var log = document.getElementById('log');
             log.appendChild(item);
 
-            log.scrollTop = log.scrollHeight;
+            var logContainer = document.getElementById('log-container');
+            logContainer.scrollTop = logContainer.scrollHeight;
         }
     </script>
 </head>
