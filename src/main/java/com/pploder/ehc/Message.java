@@ -10,11 +10,6 @@ package com.pploder.ehc;
 public interface Message {
 
     /**
-     * @return The server that provided the connection for the message.
-     */
-    Console getConsole();
-
-    /**
      * @return The connection from which the message originated.
      */
     Connection getConnection();
