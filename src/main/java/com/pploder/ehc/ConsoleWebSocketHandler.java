@@ -43,7 +43,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
     public void onMessage(WebSocketConnection connection, String msg) throws Throwable {
         log.debug("Websocket message received ({}): {}", connection.httpRequest().remoteAddress(), msg);
 
-        server.supplyMessage(new SimpleMessage(getHttpConsole(), connections.get(connection), msg));
+        server.supplyMessage(new SimpleMessage(connections.get(connection), msg));
     }
 
     /**
