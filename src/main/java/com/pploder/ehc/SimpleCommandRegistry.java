@@ -13,7 +13,7 @@ import java.util.*;
  * @since 1.0.0
  */
 @XSlf4j
-public class EasyCommandRegistry implements CommandRegistry {
+public class SimpleCommandRegistry implements CommandRegistry {
 
     /**
      * The default unknown command listener.
@@ -25,20 +25,19 @@ public class EasyCommandRegistry implements CommandRegistry {
     private CommandListener unknownCommandListener;
 
     /**
-     * Creates a new instance using the default unknown command handler.
+     * Creates a new instance using the default unknown command listener.
      * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
      */
-    public EasyCommandRegistry() {
+    public SimpleCommandRegistry() {
         this(DEFAULT_UNKNOWN_COMMAND_LISTENER);
     }
 
     /**
-     * Creates a new instance using the given port.
-     * The unknown command listener is set to {@link #DEFAULT_UNKNOWN_COMMAND_LISTENER}.
+     * Creates a new instance using the given unknown command listener.
      *
      * @param unknownCommandListener The listener for unknown commands.
      */
-    public EasyCommandRegistry(CommandListener unknownCommandListener) {
+    public SimpleCommandRegistry(CommandListener unknownCommandListener) {
         setUnknownCommandListener(unknownCommandListener);
     }
 
@@ -63,7 +62,7 @@ public class EasyCommandRegistry implements CommandRegistry {
 
         String command = split.get(0);
 
-        Command cmd = new EasyCommand(message, command, args);
+        Command cmd = new SimpleCommand(message, command, args);
 
         CommandListener commandListener = getCommandListener(cmd.getName());
         if (commandListener == null) {
@@ -123,8 +122,9 @@ public class EasyCommandRegistry implements CommandRegistry {
 
     @Override
     public void setUnknownCommandListener(CommandListener unknownCommandListener) {
-        this.unknownCommandListener = Objects.requireNonNull(unknownCommandListener);
+        this.unknownCommandListener = unknownCommandListener;
 
         log.debug("Set unknown command listener");
     }
+
 }

@@ -17,11 +17,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @XSlf4j
 class ConsoleWebSocketHandler extends BaseWebSocketHandler {
 
-    private final HttpConsole server;
+    private final Console server;
 
     private final Map<WebSocketConnection, Connection> connections = new ConcurrentHashMap<>();
 
-    public ConsoleWebSocketHandler(HttpConsole server) {
+    public ConsoleWebSocketHandler(Console server) {
         this.server = server;
     }
 
@@ -43,13 +43,13 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
     public void onMessage(WebSocketConnection connection, String msg) throws Throwable {
         log.debug("Websocket message received ({}): {}", connection.httpRequest().remoteAddress(), msg);
 
-        server.supplyMessage(new EasyMessage(getHttpConsole(), connections.get(connection), msg));
+        server.supplyMessage(new SimpleMessage(getHttpConsole(), connections.get(connection), msg));
     }
 
     /**
      * @return The console for which the websocket is hosted.
      */
-    public HttpConsole getHttpConsole() {
+    public Console getHttpConsole() {
         return server;
     }
 
@@ -63,7 +63,8 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
     /**
      * @return All active connections.
      */
-    public Iterable<Connection> getConnections() {
+    public Iterable<Connection> connections() {
         return connections.values();
     }
+
 }

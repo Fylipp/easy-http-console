@@ -1,7 +1,7 @@
 package com.pploder.ehc;
 
 import javafx.util.Pair;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 import org.webbitserver.HttpControl;
 import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
@@ -19,10 +19,10 @@ import java.util.Scanner;
  * This includes the HTML interfaces and some icons for various browsers.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-@Slf4j
+@XSlf4j
 class ConsoleHttpHandler implements HttpHandler {
 
     /**
@@ -30,7 +30,7 @@ class ConsoleHttpHandler implements HttpHandler {
      */
     public static final String RESOURCE_PATH = "/com/pploder/ehc/";
 
-    private final HttpConsole httpConsole;
+    private final NetModule netModule;
     private final String site;
 
     private final Map<String, Pair<String, byte[]>> resources = new HashMap<>();
@@ -39,20 +39,20 @@ class ConsoleHttpHandler implements HttpHandler {
      * Creates a new instance for the given host and with the given absolute HTML resource path.
      * The path is the page that gets served when the root page is requested. It does not depend on the {@link #RESOURCE_PATH} to allow a custom interface to be used.
      *
-     * @param httpConsole The console for which the site will be hosted.
-     * @param path        The absolute path of the HTML interface.
+     * @param netModule The module for which the site will be hosted.
+     * @param path       The absolute path of the HTML interface.
      * @throws IOException If such an exception occurs whilst reading from the resource at the given path.
      */
-    public ConsoleHttpHandler(HttpConsole httpConsole, String path) throws IOException {
-        this.httpConsole = httpConsole;
+    public ConsoleHttpHandler(NetModule netModule, String path) throws IOException {
+        this.netModule = netModule;
 
         try (InputStream stream = getClass().getResourceAsStream(path)) {
             Scanner sc = new Scanner(stream, "UTF-8").useDelimiter("\\A");
 
             if (sc.hasNext()) {
                 site = sc.next()
-                        .replace("{{ADDRESS}}", httpConsole.getHttpURL())
-                        .replace("{{WEBSOCKET}}", httpConsole.getWebsocketURL());
+                        .replace("{{ADDRESS}}", netModule.getHttpURL())
+                        .replace("{{WEBSOCKET}}", netModule.getWebsocketURL());
             } else {
                 site = "The resource at " + path + " did not containt any content.";
             }
@@ -78,7 +78,7 @@ class ConsoleHttpHandler implements HttpHandler {
      * @param name The resource name.
      */
     private void loadResource(String mime, String name) {
-        log.debug("Loading resource <{}>...", name);
+        log.debug("Loading resource '{}'...", name);
 
         try (InputStream stream = getClass().getResourceAsStream(RESOURCE_PATH + name)) {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream(16 * 1024);
@@ -95,19 +95,20 @@ class ConsoleHttpHandler implements HttpHandler {
 
             resources.put("/" + name, new Pair<>(mime, bytes.toByteArray()));
 
-            log.debug("Successfully loaded resource <{}> ({} bytes).", name, bytes.size());
+            log.debug("Successfully loaded resource '{}' ({} bytes).", name, bytes.size());
         } catch (IOException e) {
             // The exception is suppressed as further handling of an I/O error is not intended
-            log.warn("Failed to load resource <{}>", name, mime);
+            log.warn("Failed to load resource '{}'", name, mime, e);
         }
     }
 
     @Override
     public void handleHttpRequest(HttpRequest httpRequest, HttpResponse httpResponse, HttpControl httpControl) throws Exception {
-        log.debug("HTTP request of '{}' ({})", httpRequest.uri(), httpRequest.method());
+        log.debug("Incoming HTTP request of '{}' ({})", httpRequest.uri(), httpRequest.method());
 
         String uri = httpRequest.uri();
         if (uri.equals("/")) {
+            log.debug("Requested URI is root; sending 200");
             httpResponse
                     .status(200)
                     .header("Content-Type", "text/html")
@@ -134,4 +135,5 @@ class ConsoleHttpHandler implements HttpHandler {
         }
 
     }
+
 }

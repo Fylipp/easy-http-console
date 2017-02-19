@@ -6,7 +6,8 @@ import org.json.simple.JSONObject;
 import java.util.Iterator;
 
 /**
- * An iterator for streaming a collection of generated {@link MessageSnippet} instances from a JSON array.
+ * An iterator for iterating over a collection of {@link MessageSnippet} instances.
+ * The instances are deserialize from a JSON array as needed.
  *
  * @author Philipp Ploder
  * @version 2.0.0

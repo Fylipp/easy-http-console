@@ -9,9 +9,9 @@ import java.util.Objects;
  * @version 2.0.0
  * @since 1.0.0
  */
-public class EasyMessage implements Message {
+public class SimpleMessage implements Message {
 
-    private final HttpConsole server;
+    private final Console server;
     private final Connection connection;
     private final String message;
 
@@ -23,14 +23,14 @@ public class EasyMessage implements Message {
      * @param connection The connection from which the message originates.
      * @param message    The message itself.
      */
-    public EasyMessage(HttpConsole server, Connection connection, String message) {
+    public SimpleMessage(Console server, Connection connection, String message) {
         this.server = Objects.requireNonNull(server);
         this.connection = Objects.requireNonNull(connection);
         this.message = Objects.requireNonNull(message).trim();
     }
 
     @Override
-    public HttpConsole getHttpConsole() {
+    public Console getConsole() {
         return server;
     }
 
@@ -43,4 +43,5 @@ public class EasyMessage implements Message {
     public String getMessage() {
         return message;
     }
+
 }

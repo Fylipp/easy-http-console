@@ -183,44 +183,4 @@ public class MessageSnippet {
         return strikethroughOverride;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        MessageSnippet that = (MessageSnippet) o;
-
-        if (!text.equals(that.text)) return false;
-        if (colorOverride != null ? !colorOverride.equals(that.colorOverride) : that.colorOverride != null)
-            return false;
-        if (boldOverride != null ? !boldOverride.equals(that.boldOverride) : that.boldOverride != null) return false;
-        if (italicOverride != null ? !italicOverride.equals(that.italicOverride) : that.italicOverride != null)
-            return false;
-        if (underlinedOverride != null ? !underlinedOverride.equals(that.underlinedOverride) : that.underlinedOverride != null)
-            return false;
-        return strikethroughOverride != null ? strikethroughOverride.equals(that.strikethroughOverride) : that.strikethroughOverride == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = text.hashCode();
-        result = 31 * result + (colorOverride != null ? colorOverride.hashCode() : 0);
-        result = 31 * result + (boldOverride != null ? boldOverride.hashCode() : 0);
-        result = 31 * result + (italicOverride != null ? italicOverride.hashCode() : 0);
-        result = 31 * result + (underlinedOverride != null ? underlinedOverride.hashCode() : 0);
-        result = 31 * result + (strikethroughOverride != null ? strikethroughOverride.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "MessageSnippet{" +
-                "text='" + text + '\'' +
-                ", colorOverride=" + colorOverride +
-                ", boldOverride=" + boldOverride +
-                ", italicOverride=" + italicOverride +
-                ", underlinedOverride=" + underlinedOverride +
-                ", strikethroughOverride=" + strikethroughOverride +
-                '}';
-    }
 }

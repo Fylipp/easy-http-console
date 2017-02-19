@@ -103,4 +103,5 @@ public class MessageContent implements Iterable<MessageSnippet> {
     public Spliterator<MessageSnippet> spliterator() {
         return snippets.spliterator();
     }
+
 }

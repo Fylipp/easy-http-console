@@ -1,7 +1,8 @@
 package com.pploder.ehc;
 
 /**
- * A manager for commands.
+ * A mapping of commands to {@link CommandListener} instances.
+ * Additionally a listener for unknown commands can be registered.
  *
  * @author Philipp Ploder
  * @version 2.0.0

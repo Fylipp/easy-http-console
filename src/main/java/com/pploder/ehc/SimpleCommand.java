@@ -1,15 +1,16 @@
 package com.pploder.ehc;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
  * The default implementation of the {@link Command} interface.
  *
  * @author Philipp Ploder
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-public class EasyCommand implements Command {
+public class SimpleCommand implements Command {
 
     private final Message source;
     private final String command;
@@ -22,7 +23,7 @@ public class EasyCommand implements Command {
      * @param name   The name of the command.
      * @param args   The arguments of the command.
      */
-    public EasyCommand(Message source, String name, String[] args) {
+    public SimpleCommand(Message source, String name, String[] args) {
         this.source = Objects.requireNonNull(source);
         this.command = Objects.requireNonNull(name);
         this.args = Objects.requireNonNull(args);
@@ -47,4 +48,10 @@ public class EasyCommand implements Command {
     public String getArg(int i) {
         return args[i];
     }
+
+    @Override
+    public Iterable<String> args() {
+        return Arrays.asList(args);
+    }
+
 }

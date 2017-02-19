@@ -1,14 +1,14 @@
 package com.pploder.ehc;
 
 /**
- * A console that is provided via HTTP.
+ * A console that is provided via a network.
  * The received messages can be obtained by adding a {@link MessageListener}.
  *
  * @author Philipp Ploder
  * @version 2.0.0
  * @since 1.0.0
  */
-public interface HttpConsole extends AutoCloseable {
+public interface Console extends AutoCloseable {
 
     /**
      * Starts the console.
@@ -17,26 +17,6 @@ public interface HttpConsole extends AutoCloseable {
      * @throws Exception             If something goes wrong.
      */
     void start() throws Exception;
-
-    /**
-     * @return The host that the console is running on.
-     */
-    String getHost();
-
-    /**
-     * @return The port that the console is running on.
-     */
-    int getPort();
-
-    /**
-     * @return The URL of the websocket of the console.
-     */
-    String getWebsocketURL();
-
-    /**
-     * @return The URL of the HTTP console provider.
-     */
-    String getHttpURL();
 
     /**
      * Adds a message listener,
@@ -75,8 +55,8 @@ public interface HttpConsole extends AutoCloseable {
     int getConnectionCount();
 
     /**
-     * @return All active connections.
+     * @return All active connections in no defined order.
      */
-    Iterable<Connection> getConnections();
+    Iterable<Connection> connections();
 
 }

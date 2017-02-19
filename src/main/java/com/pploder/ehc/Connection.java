@@ -1,20 +1,21 @@
 package com.pploder.ehc;
 
 /**
- * Represents a connection to a network client.
+ * Represents a network connection to a client.
  *
  * @author Philipp Ploder
  * @version 2.0.0
  * @since 2.0.0
  */
 public interface Connection {
-    /**
-     * @return The {@link HttpConsole} of this connection.
-     */
-    HttpConsole getHttpConsole();
 
     /**
-     * @return The remote address.
+     * @return The {@link Console} of this connection.
+     */
+    Console getConsole();
+
+    /**
+     * @return The remote address of the client.
      */
     String getRemoteAddress();
 
@@ -40,4 +41,5 @@ public interface Connection {
      * @throws Exception If something goes wrong.
      */
     void close() throws Exception;
+
 }
