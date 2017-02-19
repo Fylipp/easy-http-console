@@ -10,6 +10,10 @@ public class MockupConnection implements Connection {
 
     private boolean sendCalled, closeCalled;
 
+    public MockupConnection(Console console, String remoteAddress) {
+        this(console, remoteAddress, null);
+    }
+
     public MockupConnection(Console console, String remoteAddress, Consumer<MessageContent> sendListener) {
         this.console = console;
         this.remoteAddress = remoteAddress;
