@@ -62,7 +62,7 @@ public class SimpleConsoleTest {
         Connection connection = new MockupConnection(simpleConsole, "RemoteAddress", null);
 
         simpleConsole.addMessageListener(messageListener);
-        simpleConsole.supplyMessage(new SimpleMessage(simpleConsole, connection, "Test"));
+        simpleConsole.supplyMessage(new SimpleMessage(connection, "Test"));
 
         Assert.assertTrue(listenerCalled.get());
     }
@@ -83,7 +83,7 @@ public class SimpleConsoleTest {
         simpleConsole.addMessageListener(messageListener1);
         simpleConsole.addMessageListener(messageListener2);
         simpleConsole.addMessageListener(messageListener3);
-        simpleConsole.supplyMessage(new SimpleMessage(simpleConsole, connection, "Test"));
+        simpleConsole.supplyMessage(new SimpleMessage(connection, "Test"));
 
         Assert.assertTrue(listenerCalled1.get());
         Assert.assertTrue(listenerCalled2.get());
@@ -101,7 +101,7 @@ public class SimpleConsoleTest {
 
         simpleConsole.addMessageListener(messageListener);
         simpleConsole.removeMessageListener(messageListener);
-        simpleConsole.supplyMessage(new SimpleMessage(simpleConsole, connection, "Test"));
+        simpleConsole.supplyMessage(new SimpleMessage(connection, "Test"));
 
         Assert.assertFalse(listenerCalled.get());
     }
