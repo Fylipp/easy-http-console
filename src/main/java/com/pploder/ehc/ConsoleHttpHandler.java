@@ -10,7 +10,11 @@ import org.webbitserver.HttpResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -32,6 +36,9 @@ class ConsoleHttpHandler implements HttpHandler {
 
     private final NetModule netModule;
     private final String site;
+
+    private final SimpleDateFormat dateFormat =
+            new SimpleDateFormat("EEEE, dd MMMM yyyy kk:mm ('UTC'Z)", Locale.US);
 
     private final Map<String, Pair<String, byte[]>> resources = new HashMap<>();
 
@@ -112,7 +119,7 @@ class ConsoleHttpHandler implements HttpHandler {
             httpResponse
                     .status(200)
                     .header("Content-Type", "text/html")
-                    .content(site.replace("{{SERVED}}", "Saturday, February 2 2017 22:13 (UTC+1)"))
+                    .content(site.replace("{{SERVED}}", dateFormat.format(Date.from(Instant.now()))))
                     .end();
         } else {
             Pair<String, byte[]> r = resources.get(uri);
