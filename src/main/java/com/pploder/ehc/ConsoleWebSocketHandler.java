@@ -49,7 +49,7 @@ class ConsoleWebSocketHandler extends BaseWebSocketHandler {
     /**
      * @return The console for which the websocket is hosted.
      */
-    public Console getHttpConsole() {
+    public Console getConsole() {
         return server;
     }
 
