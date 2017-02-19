@@ -11,7 +11,7 @@ package com.pploder.ehc;
 public interface CommandRegistry {
 
     /**
-     * Supplies the object with a message that will be processed by the appropriate listeners.
+     * Supplies the object with a message that will be processed by the appropriate listener.
      *
      * @param message The message.
      */
