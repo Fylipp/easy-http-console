@@ -2,7 +2,8 @@ package com.pploder.ehc;
 
 /**
  * A console that is provided via a network.
- * The received messages can be obtained by adding a {@link MessageListener}.
+ * The received messages as well as newly opened and closed connection can be observed via {@link MessageListener} and
+ * {@link ConnectionListener} instances.
  *
  * @author Philipp Ploder
  * @version 2.0.0
@@ -40,6 +41,38 @@ public interface Console extends AutoCloseable {
      * @param message The message.
      */
     void supplyMessage(Message message);
+
+    /**
+     * Adds a listener for opened connections.
+     *
+     * @param connectionListener The connection listener.
+     * @throws NullPointerException If the given reference is {@code null}.
+     */
+    void addConnectionOpenedListener(ConnectionListener connectionListener) throws NullPointerException;
+
+    /**
+     * Removes a listener for opened connections.
+     *
+     * @param connectionListener The connection listener.
+     * @throws NullPointerException If the given reference is {@code null}.
+     */
+    void removeConnectionOpenedListener(ConnectionListener connectionListener) throws NullPointerException;
+
+    /**
+     * Adds a listener for closed connection.
+     *
+     * @param connectionListener The connection listener.
+     * @throws NullPointerException If the given reference is {@code null}.
+     */
+    void addConnectionClosedListener(ConnectionListener connectionListener) throws NullPointerException;
+
+    /**
+     * Removes a listener for closed connections.
+     *
+     * @param connectionListener The connection listener.
+     * @throws NullPointerException If the given reference is {@code null}.
+     */
+    void removeConnectionClosedListener(ConnectionListener connectionListener) throws NullPointerException;
 
     /**
      * Stops the console.
