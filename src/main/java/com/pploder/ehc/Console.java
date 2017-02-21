@@ -19,7 +19,7 @@ public interface Console extends AutoCloseable {
     void start() throws Exception;
 
     /**
-     * Adds a message listener,
+     * Adds a message listener.
      *
      * @param messageListener The message listener.
      * @throws NullPointerException If the given reference is {@code null}.
