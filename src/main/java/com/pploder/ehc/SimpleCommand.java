@@ -5,6 +5,7 @@ import java.util.Objects;
 
 /**
  * The default implementation of the {@link Command} interface.
+ * This class achieves no more than what is specified in the interface.
  *
  * @author Philipp Ploder
  * @version 2.0.0

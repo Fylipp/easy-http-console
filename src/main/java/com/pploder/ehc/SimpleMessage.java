@@ -4,6 +4,7 @@ import java.util.Objects;
 
 /**
  * The default implementation of the {@link Message} interface.
+ * This class achieves no more than what is specified in the interface.
  *
  * @author Philipp Ploder
  * @version 2.0.0
@@ -33,6 +34,11 @@ public class SimpleMessage implements Message {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("SimpleMessage{connection=%s, message='%s'}", connection, message);
     }
 
 }

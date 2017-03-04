@@ -7,6 +7,7 @@ import java.util.Objects;
 
 /**
  * Wraps a {@link WebSocketConnection} to provide abstracted usage.
+ * This abstracts the inner workings of websockets.
  *
  * @author Philipp Ploder
  * @version 2.0.0
@@ -56,6 +57,11 @@ class WebSocketConnectionWrapper implements Connection {
     public void close() throws Exception {
         log.debug("Closing connection to {}...", getRemoteAddress());
         webSocketConnection.close();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("WebSocketConnectionWrapper{remoteAddress='%s'}", remoteAddress);
     }
 
 }

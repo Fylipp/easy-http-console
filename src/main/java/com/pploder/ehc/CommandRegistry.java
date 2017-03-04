@@ -1,7 +1,10 @@
 package com.pploder.ehc;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 /**
- * A mapping of commands to {@link CommandListener} instances.
+ * A mapping of commands to consumers.
  * Additionally a listener for unknown commands can be registered.
  *
  * @author Philipp Ploder
@@ -24,7 +27,7 @@ public interface CommandRegistry {
      * @param command         The command for which the listener should be set.
      * @param commandListener The command listener.
      */
-    void put(String command, CommandListener commandListener);
+    void put(String command, Consumer<Command> commandListener);
 
     /**
      * Removes the command listener for the given command.
@@ -40,20 +43,20 @@ public interface CommandRegistry {
 
     /**
      * @param command The command to get the listener of.
-     * @return The command listener for the given command or null if not found.
+     * @return The optional command listener for the given command.
      */
-    CommandListener getCommandListener(String command);
+    Optional<Consumer<Command>> getCommandListener(String command);
 
     /**
      * @param command The command to get the listener of.
      * @return The command listener for the given command or the result of {@link #getUnknownCommandListener()} if not found.
      */
-    CommandListener getCommandListenerOrFallback(String command);
+    Optional<Consumer<Command>> getCommandListenerOrFallback(String command);
 
     /**
      * @return The command listener that is used when an incoming command is not registered.
      */
-    CommandListener getUnknownCommandListener();
+    Optional<Consumer<Command>> getUnknownCommandListener();
 
     /**
      * Sets the unknown command listener.
@@ -61,6 +64,6 @@ public interface CommandRegistry {
      *
      * @param unknownCommandListener The new unknown command listener.
      */
-    void setUnknownCommandListener(CommandListener unknownCommandListener);
+    void setUnknownCommandListener(Consumer<Command> unknownCommandListener);
 
 }

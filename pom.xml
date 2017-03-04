@@ -35,6 +35,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
+                    <compilerVersion>1.8</compilerVersion>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
@@ -64,6 +65,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.Fylipp</groupId>
+            <artifactId>easy-events</artifactId>
+            <version>v1.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.webbitserver</groupId>
             <artifactId>webbit</artifactId>
             <version>0.4.15</version>
@@ -88,9 +95,28 @@
         </dependency>
 
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.14</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 </project>

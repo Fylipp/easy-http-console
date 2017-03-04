@@ -1,26 +1,24 @@
 package com.pploder.ehc;
 
-import javafx.util.Pair;
 import lombok.extern.slf4j.XSlf4j;
 import org.webbitserver.HttpControl;
 import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Serves the HTTP content of the web interface.
- * This includes the HTML interfaces and some icons for various browsers.
+ * This includes the HTML interface and some various resources (like icons).
  *
  * @author Philipp Ploder
  * @version 2.0.0
@@ -29,83 +27,36 @@ import java.util.Scanner;
 @XSlf4j
 class ConsoleHttpHandler implements HttpHandler {
 
-    /**
-     * The folder containing all of the required static resources.
-     */
-    public static final String RESOURCE_PATH = "/com/pploder/ehc/";
-
     private final NetModule netModule;
-    private final String site;
 
-    private final SimpleDateFormat dateFormat =
-            new SimpleDateFormat("EEEE, dd MMMM yyyy kk:mm ('UTC'Z)", Locale.US);
-
-    private final Map<String, Pair<String, byte[]>> resources = new HashMap<>();
+    private final Map<String, Supplier<Page>> uriHandler = new HashMap<>();
 
     /**
      * Creates a new instance for the given host and with the given absolute HTML resource path.
-     * The path is the page that gets served when the root page is requested. It does not depend on the {@link #RESOURCE_PATH} to allow a custom interface to be used.
+     * The path is the page that gets served when the root page is requested.
      *
-     * @param netModule The module for which the site will be hosted.
-     * @param path       The absolute path of the HTML interface.
+     * @param netModule         The module for which the site will be hosted.
+     * @param interfaceSupplier The supplier for the interface.
+     * @param resources         The resources to be served besides the interface
      * @throws IOException If such an exception occurs whilst reading from the resource at the given path.
      */
-    public ConsoleHttpHandler(NetModule netModule, String path) throws IOException {
+    public ConsoleHttpHandler(NetModule netModule, Supplier<Page> interfaceSupplier, Resource... resources)
+            throws IOException {
         this.netModule = netModule;
 
-        try (InputStream stream = getClass().getResourceAsStream(path)) {
-            Scanner sc = new Scanner(stream, "UTF-8").useDelimiter("\\A");
+        uriHandler.put("/", Objects.requireNonNull(interfaceSupplier));
 
-            if (sc.hasNext()) {
-                site = sc.next()
-                        .replace("{{ADDRESS}}", netModule.getHttpURL())
-                        .replace("{{WEBSOCKET}}", netModule.getWebsocketURL());
-            } else {
-                site = "The resource at " + path + " did not containt any content.";
+        for (Resource resource : resources) {
+            log.debug("Loading resource {}", resource.getPath());
+
+            try {
+                uriHandler.put(resource.getWebPath(), new RawHttpSupplier(
+                        Files.readAllBytes(Paths.get(Resource.class.getResource(resource.getPath()).toURI())),
+                        resource.getMime()
+                ));
+            } catch (IOException | URISyntaxException e) {
+                log.catching(e);
             }
-        }
-
-        loadResource("image/png", "android-chrome-192x192.png");
-        loadResource("image/png", "android-chrome-256x256.png");
-        loadResource("image/png", "apple-touch-icon.png");
-        loadResource("application/xml", "browserconfig.xml");
-        loadResource("image/x-icon", "favicon.ico");
-        loadResource("image/png", "favicon-16x16.png");
-        loadResource("image/png", "favicon-32x32.png");
-        loadResource("application/json", "manifest.json");
-        loadResource("image/png", "mstile-150x150.png");
-        loadResource("image/svg+xml", "safari-pinned-tab.svg");
-    }
-
-    /**
-     * Loads the given resource into memory and stores it together with its MIME type.
-     * Any I/O error is suppressed for convenience as this method is only used in the constructor of this class.
-     *
-     * @param mime The MIME type of the resource.
-     * @param name The resource name.
-     */
-    private void loadResource(String mime, String name) {
-        log.debug("Loading resource '{}'...", name);
-
-        try (InputStream stream = getClass().getResourceAsStream(RESOURCE_PATH + name)) {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream(16 * 1024);
-
-            while (true) {
-                int c = stream.read();
-
-                if (c < 0) {
-                    break;
-                }
-
-                bytes.write(c);
-            }
-
-            resources.put("/" + name, new Pair<>(mime, bytes.toByteArray()));
-
-            log.debug("Successfully loaded resource '{}' ({} bytes).", name, bytes.size());
-        } catch (IOException e) {
-            // The exception is suppressed as further handling of an I/O error is not intended
-            log.warn("Failed to load resource '{}'", name, mime, e);
         }
     }
 
@@ -114,6 +65,46 @@ class ConsoleHttpHandler implements HttpHandler {
         log.debug("Incoming HTTP request of '{}' ({})", httpRequest.uri(), httpRequest.method());
 
         String uri = httpRequest.uri();
+
+        Supplier<Page> pageSupplier = uriHandler.get(uri);
+
+        if (pageSupplier == null) {
+            httpResponse
+                    .status(404)
+                    .header("Content-Type", "text/html")
+                    .content("URI handler not found for " + uri)
+                    .end();
+        } else {
+            Page page = pageSupplier.get();
+
+            Object data = page.getData();
+
+            if (page.isSite()) {
+                if (!(data instanceof String)) {
+                    data = String.valueOf(data);
+                }
+
+                data = ((String) data)
+                        .replace("{{ADDRESS}}", netModule.getHttpURL())
+                        .replace("{{WEBSOCKET}}", netModule.getWebsocketURL());
+            }
+
+            httpResponse
+                    .status(page.getResponseCode())
+                    .header("Content-Type", page.getMime());
+
+            if (data instanceof byte[]) {
+                httpResponse.content((byte[]) data);
+            } else if (data instanceof ByteBuffer) {
+                httpResponse.content((ByteBuffer) data);
+            } else {
+                httpResponse.content(String.valueOf(data));
+            }
+
+            httpResponse.end();
+        }
+
+        /*
         if (uri.equals("/")) {
             log.debug("Requested URI is root; sending 200");
             httpResponse
@@ -140,7 +131,7 @@ class ConsoleHttpHandler implements HttpHandler {
                         .end();
             }
         }
-
+        */
     }
 
 }

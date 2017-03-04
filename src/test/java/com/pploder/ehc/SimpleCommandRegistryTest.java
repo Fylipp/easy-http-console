@@ -4,8 +4,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class SimpleCommandRegistryTest {
 
@@ -13,35 +17,36 @@ public class SimpleCommandRegistryTest {
     public void testEmptyConstructor() {
         CommandRegistry commandRegistry = new SimpleCommandRegistry();
 
-        Assert.assertEquals(SimpleCommandRegistry.DEFAULT_UNKNOWN_COMMAND_LISTENER, commandRegistry.getUnknownCommandListener());
+        Assert.assertEquals(SimpleCommandRegistry.DEFAULT_UNKNOWN_COMMAND_LISTENER,
+                commandRegistry.getUnknownCommandListener().get());
     }
 
     @Test
     public void testNormalConstructor() {
-        CommandListener commandListener = cmd -> {};
+        Consumer<Command> commandListener = cmd -> {};
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry(commandListener);
 
-        Assert.assertEquals(commandListener, commandRegistry.getUnknownCommandListener());
+        Assert.assertEquals(commandListener, commandRegistry.getUnknownCommandListener().get());
     }
 
     @Test
     public void testNormalConstructorNull() {
         CommandRegistry commandRegistry = new SimpleCommandRegistry(null);
 
-        Assert.assertNull(commandRegistry.getUnknownCommandListener());
+        Assert.assertFalse(commandRegistry.getUnknownCommandListener().isPresent());
     }
 
     @Test
     public void testSetUnknownCommandHandler() {
-        CommandListener commandListener1 = cmd -> {};
-        CommandListener commandListener2 = cmd -> {};
+        Consumer<Command> commandListener1 = cmd -> {};
+        Consumer<Command> commandListener2 = cmd -> {};
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry(commandListener1);
 
-        Assert.assertEquals(commandListener1, commandRegistry.getUnknownCommandListener());
+        Assert.assertEquals(commandListener1, commandRegistry.getUnknownCommandListener().get());
         commandRegistry.setUnknownCommandListener(commandListener2);
-        Assert.assertEquals(commandListener2, commandRegistry.getUnknownCommandListener());
+        Assert.assertEquals(commandListener2, commandRegistry.getUnknownCommandListener().get());
     }
 
     @Test
@@ -49,30 +54,30 @@ public class SimpleCommandRegistryTest {
         CommandRegistry commandRegistry = new SimpleCommandRegistry();
 
         commandRegistry.setUnknownCommandListener(null);
-        Assert.assertNull(commandRegistry.getUnknownCommandListener());
+        Assert.assertFalse(commandRegistry.getUnknownCommandListener().isPresent());
     }
 
     @Test
     public void testPutAndRetrieveCommandListener() {
         String command = "command";
-        CommandListener commandListener = cmd -> {};
+        Consumer<Command> commandListener = cmd -> {};
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry();
         commandRegistry.put(command, commandListener);
 
-        Assert.assertEquals(commandListener, commandRegistry.getCommandListener(command));
+        Assert.assertEquals(commandListener, commandRegistry.getCommandListener(command).get());
     }
 
     @Test
     public void testPutAndExecuteCommandListener() {
         AtomicBoolean executed = new AtomicBoolean();
         String command = "command";
-        CommandListener commandListener = cmd -> executed.set(true);
+        Consumer<Command> commandListener = cmd -> executed.set(true);
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry();
         commandRegistry.put(command, commandListener);
 
-        commandRegistry.getCommandListener(command).accept(null);
+        commandRegistry.getCommandListener(command).ifPresent(commandConsumer -> commandConsumer.accept(null));
 
         Assert.assertTrue(executed.get());
     }
@@ -80,16 +85,16 @@ public class SimpleCommandRegistryTest {
     @Test
     public void testPutAndRemoveCommandListener() {
         String command = "command";
-        CommandListener commandListener = cmd -> {};
+        Consumer<Command> commandListener = cmd -> {};
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry();
         commandRegistry.put(command, commandListener);
 
-        Assert.assertEquals(commandListener, commandRegistry.getCommandListener(command));
+        Assert.assertEquals(commandListener, commandRegistry.getCommandListener(command).get());
 
         commandRegistry.remove(command);
 
-        Assert.assertNull(commandRegistry.getCommandListener(command));
+        Assert.assertFalse(commandRegistry.getCommandListener(command).isPresent());
         Assert.assertFalse(commandRegistry.commands().iterator().hasNext());
     }
 
@@ -102,11 +107,11 @@ public class SimpleCommandRegistryTest {
 
     @Test
     public void testFallback() {
-        CommandListener fallback = cmd -> {};
+        Consumer<Command> fallback = cmd -> {};
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry(fallback);
 
-        Assert.assertEquals(fallback, commandRegistry.getCommandListenerOrFallback("command"));
+        Assert.assertEquals(fallback, commandRegistry.getCommandListenerOrFallback("command").get());
     }
 
     @Test
@@ -114,7 +119,7 @@ public class SimpleCommandRegistryTest {
         String command1 = "command1";
         String command2 = "command2";
         String command3 = "command3";
-        CommandListener commandListener = cmd -> {};
+        Consumer<Command> commandListener = cmd -> {};
 
         CommandRegistry commandRegistry = new SimpleCommandRegistry();
         commandRegistry.put(command1, commandListener);
@@ -128,6 +133,30 @@ public class SimpleCommandRegistryTest {
         Assert.assertTrue(commands.contains(command1));
         Assert.assertTrue(commands.contains(command2));
         Assert.assertTrue(commands.contains(command3));
+    }
+
+    @Test
+    public void testMessageSupply() throws Exception {
+        AtomicInteger argsCount = new AtomicInteger();
+        AtomicReference<Iterator> args = new AtomicReference<>();
+        String command = "command";
+        Message message = new SimpleMessage(
+                new MockupConnection(new SimpleConsole<>(new MockupNetModule()), "RemoteAddress"),
+                "command 1 2 3");
+        Consumer<Command> commandListener = cmd -> {
+            argsCount.set(cmd.getArgsCount());
+            args.set(cmd.args().iterator());
+        };
+
+        CommandRegistry commandRegistry = new SimpleCommandRegistry();
+        commandRegistry.put(command, commandListener);
+
+        commandRegistry.supplyMessage(message);
+
+        Assert.assertEquals(3, argsCount.get());
+        Assert.assertEquals("1", args.get().next());
+        Assert.assertEquals("2", args.get().next());
+        Assert.assertEquals("3", args.get().next());
     }
 
 }

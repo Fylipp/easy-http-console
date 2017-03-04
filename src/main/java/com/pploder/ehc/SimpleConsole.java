@@ -1,10 +1,9 @@
 package com.pploder.ehc;
 
+import com.pploder.events.Event;
 import lombok.extern.slf4j.XSlf4j;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The non-I/O behaviour defined by {@link Console} with I/O outsourced to a {@link NetModule}.
@@ -18,8 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SimpleConsole<N extends NetModule> implements Console {
 
     private final N io;
-
-    private final List<MessageListener> messageListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new instance.
@@ -46,6 +43,21 @@ public class SimpleConsole<N extends NetModule> implements Console {
     }
 
     @Override
+    public Event<Message> messageReceivedEvent() {
+        return getIOModule().messageReceivedEvent();
+    }
+
+    @Override
+    public Event<Connection> connectionAddedEvent() {
+        return getIOModule().connectionOpenedEvent();
+    }
+
+    @Override
+    public Event<Connection> connectionRemovedEvent() {
+        return getIOModule().connectionClosedEvent();
+    }
+
+    @Override
     public void start() throws Exception {
         log.info("Starting {}...", this);
 
@@ -57,33 +69,6 @@ public class SimpleConsole<N extends NetModule> implements Console {
         log.info("Closing {}...", this);
 
         io.close();
-    }
-
-    @Override
-    public void addMessageListener(MessageListener messageListener) throws NullPointerException {
-        messageListeners.add(Objects.requireNonNull(messageListener));
-
-        log.debug("Message listener added to {}", this);
-    }
-
-    @Override
-    public void removeMessageListener(MessageListener messageListener) throws NullPointerException {
-        messageListeners.remove(Objects.requireNonNull(messageListener));
-
-        log.debug("Message listener removed from {}", this);
-    }
-
-    @Override
-    public void supplyMessage(Message message) {
-        log.debug("Message supplied to {}: {}", this, message.getMessage());
-
-        for (MessageListener messageListener : messageListeners) {
-            try {
-                messageListener.accept(message);
-            } catch (Exception e) {
-                log.catching(e);
-            }
-        }
     }
 
     @Override

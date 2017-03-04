@@ -1,6 +1,13 @@
 package com.pploder.ehc;
 
+import com.pploder.events.Event;
+import com.pploder.events.SimpleEvent;
+
 public class MockupNetModule implements NetModule {
+
+    private final Event<Message> messageReceivedEvent = new SimpleEvent<>();
+    private final Event<Connection> connectionOpenedEvent = new SimpleEvent<>();
+    private final Event<Connection> connectionClosedEvent = new SimpleEvent<>();
 
     private boolean initCalled, startCalled, closeCalled, getConnectionCountCalled, getConnectionsCalled;
 
@@ -53,6 +60,21 @@ public class MockupNetModule implements NetModule {
     @Override
     public void init(Console console) throws Exception {
         initCalled = true;
+    }
+
+    @Override
+    public Event<Message> messageReceivedEvent() {
+        return messageReceivedEvent;
+    }
+
+    @Override
+    public Event<Connection> connectionOpenedEvent() {
+        return connectionOpenedEvent;
+    }
+
+    @Override
+    public Event<Connection> connectionClosedEvent() {
+        return connectionClosedEvent;
     }
 
     @Override

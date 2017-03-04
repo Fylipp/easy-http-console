@@ -4,6 +4,7 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import lombok.extern.slf4j.XSlf4j;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * The default implementation of {@link CommandRegistry}.
@@ -18,11 +19,11 @@ public class SimpleCommandRegistry implements CommandRegistry {
     /**
      * The default unknown command listener.
      */
-    public static final CommandListener DEFAULT_UNKNOWN_COMMAND_LISTENER = cmd -> cmd.getSource().getConnection().send("Unknown command: " + cmd.getName());
+    public static final Consumer<Command> DEFAULT_UNKNOWN_COMMAND_LISTENER = cmd -> cmd.getSource().getConnection().send("Unknown command: " + cmd.getName());
 
-    private final Map<String, CommandListener> commandListeners = new HashMap<>();
+    private final Map<String, Consumer<Command>> commandListeners = new HashMap<>();
 
-    private CommandListener unknownCommandListener;
+    private Consumer<Command> unknownCommandListener;
 
     /**
      * Creates a new instance using the default unknown command listener.
@@ -37,66 +38,35 @@ public class SimpleCommandRegistry implements CommandRegistry {
      *
      * @param unknownCommandListener The listener for unknown commands.
      */
-    public SimpleCommandRegistry(CommandListener unknownCommandListener) {
+    public SimpleCommandRegistry(Consumer<Command> unknownCommandListener) {
         setUnknownCommandListener(unknownCommandListener);
     }
 
     @Override
     public void supplyMessage(Message message) {
-        log.debug("Message supplied to command registry: {}", message.getMessage());
+        String[] split = ArgumentTokenizer.tokenize(message.getMessage()).toArray(new String[0]);
+        String[] args;
 
-        List<String> split = ArgumentTokenizer.tokenize(message.getMessage());
-
-        String[] args = new String[split.size() - 1];
-
-        Iterator<String> iter = split.iterator();
-        if (iter.hasNext()) {
-            iter.next();
-
-            int i = 0;
-
-            while (iter.hasNext()) {
-                args[i++] = iter.next();
-            }
+        if (split.length > 1) {
+            args = Arrays.copyOfRange(split, 1, split.length);
+        } else {
+            args = new String[0];
         }
 
-        String command = split.get(0);
-
+        String command = split[0];
         Command cmd = new SimpleCommand(message, command, args);
 
-        CommandListener commandListener = getCommandListener(cmd.getName());
-        if (commandListener == null) {
-            log.debug("Unknown command '{}', defaulting to unknown command handler (if available)", command);
-
-            CommandListener fallback = getUnknownCommandListener();
-            if (fallback != null) {
-                try {
-                    fallback.accept(cmd);
-                } catch (Exception e) {
-                    log.catching(e);
-                }
-            }
-        } else {
-            try {
-                commandListener.accept(cmd);
-            } catch (Exception e) {
-                log.catching(e);
-            }
-        }
+        getCommandListenerOrFallback(command).ifPresent(commandListener -> commandListener.accept(cmd));
     }
 
     @Override
-    public void put(String command, CommandListener commandListener) {
+    public void put(String command, Consumer<Command> commandListener) {
         commandListeners.put(Objects.requireNonNull(command), Objects.requireNonNull(commandListener));
-
-        log.debug("New command listener set for '{}'", command);
     }
 
     @Override
     public void remove(String command) {
         commandListeners.remove(Objects.requireNonNull(command));
-
-        log.debug("Command listener removed for '{}'", command);
     }
 
     @Override
@@ -105,26 +75,29 @@ public class SimpleCommandRegistry implements CommandRegistry {
     }
 
     @Override
-    public CommandListener getCommandListener(String command) {
-        return commandListeners.get(Objects.requireNonNull(command));
+    public Optional<Consumer<Command>> getCommandListener(String command) {
+        return Optional.ofNullable(commandListeners.get(Objects.requireNonNull(command)));
     }
 
     @Override
-    public CommandListener getCommandListenerOrFallback(String command) {
-        CommandListener commandListener = getCommandListener(command);
-        return commandListener == null ? getUnknownCommandListener() : commandListener;
+    public Optional<Consumer<Command>> getCommandListenerOrFallback(String command) {
+        Optional<Consumer<Command>> commandListener = getCommandListener(command);
+
+        if (commandListener.isPresent()) {
+            return commandListener;
+        }
+
+        return getUnknownCommandListener();
     }
 
     @Override
-    public CommandListener getUnknownCommandListener() {
-        return unknownCommandListener;
+    public Optional<Consumer<Command>> getUnknownCommandListener() {
+        return Optional.ofNullable(unknownCommandListener);
     }
 
     @Override
-    public void setUnknownCommandListener(CommandListener unknownCommandListener) {
+    public void setUnknownCommandListener(Consumer<Command> unknownCommandListener) {
         this.unknownCommandListener = unknownCommandListener;
-
-        log.debug("Set unknown command listener");
     }
 
 }

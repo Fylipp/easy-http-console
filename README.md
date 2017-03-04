@@ -6,7 +6,14 @@ This is a simple code snippet to get you started:
 ```java
 CommandRegistry cr = new SimpleCommandRegistry();
 
-cr.put("ping", cmd -> cmd.getSource().getConnection().send("Pong."));
+cr.put("args", cmd -> {
+    cmd.respond("Args: " + cmd.getArgsCount());
+
+    for (int i = 0; i < cmd.getArgsCount(); i++) {
+        cmd.respond(i + " = \"" + cmd.getArg(i) + "\"");
+    }
+});
+cr.put("ping", cmd -> cmd.respond("Pong."));
 cr.put("stop", cmd -> {
     try {
         cmd.getSource().getConnection().getConsole().close();
@@ -16,11 +23,11 @@ cr.put("stop", cmd -> {
 });
 
 Console console = new SimpleConsole<>(new HttpNetModule());
-console.addMessageListener(cr::supplyMessage);
+console.messageReceivedEvent().addListener(cr::supplyMessage);
 console.start();
 ```
-After running your program, you can open your browser and go to `localhost:8080`. You should then see a console and an input field. You can send commands by hitting enter after you finished entering them. If you want to change the port or even the host of your server you can simply specify them as constructor arguments.
-![Screenshot of the example](http://imgur.com/zGljgZa.png)
+After running your program, you can open your browser and go to `localhost:8080`. You should then see a console and an input field. You can send commands by hitting enter after you finished entering them. If you want to change the port or even the host of your server you can simply specify them as constructor arguments of the `HttpNetModule`.
+![Screenshot of the example](http://i.imgur.com/E2THl4O.png)
 
 ## How do I get it?
 You can obtain pre-built JARs in the `Releases` tab or clone the repository and compile it yourself.

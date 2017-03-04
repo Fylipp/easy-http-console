@@ -1,7 +1,9 @@
 package com.pploder.ehc;
 
+import com.pploder.events.Event;
+
 /**
- * An interface used to provide network I/O functionality for a {@link SimpleConsole}.
+ * An interface used to provide network I/O functionality for a console.
  *
  * @author Philipp Ploder
  * @version 2.0.0
@@ -15,6 +17,21 @@ public interface NetModule {
      * @param console The console.
      */
     void init(Console console) throws Exception;
+
+    /**
+     * @return The event for received messages.
+     */
+    Event<Message> messageReceivedEvent();
+
+    /**
+     * @return The event for opened connections.
+     */
+    Event<Connection> connectionOpenedEvent();
+
+    /**
+     * @return The event for closed connections.
+     */
+    Event<Connection> connectionClosedEvent();
 
     /**
      * Starts the module.

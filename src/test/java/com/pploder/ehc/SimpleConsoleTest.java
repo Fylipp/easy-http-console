@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class SimpleConsoleTest {
 
@@ -55,14 +56,14 @@ public class SimpleConsoleTest {
     @Test
     public void testMessageListenerExecution() throws Exception {
         AtomicBoolean listenerCalled = new AtomicBoolean();
-        MessageListener messageListener = msg -> listenerCalled.set(true);
+        Consumer<Message> messageListener = args -> listenerCalled.set(true);
 
         MockupNetModule mockupNetModule = new MockupNetModule();
         SimpleConsole simpleConsole = new SimpleConsole(mockupNetModule);
         Connection connection = new MockupConnection(simpleConsole, "RemoteAddress", null);
 
-        simpleConsole.addMessageListener(messageListener);
-        simpleConsole.supplyMessage(new SimpleMessage(connection, "Test"));
+        simpleConsole.messageReceivedEvent().addListener(messageListener);
+        simpleConsole.messageReceivedEvent().trigger(new SimpleMessage(connection, "Test"));
 
         Assert.assertTrue(listenerCalled.get());
     }
@@ -72,18 +73,18 @@ public class SimpleConsoleTest {
         AtomicBoolean listenerCalled1 = new AtomicBoolean();
         AtomicBoolean listenerCalled2 = new AtomicBoolean();
         AtomicBoolean listenerCalled3 = new AtomicBoolean();
-        MessageListener messageListener1 = msg -> listenerCalled1.set(true);
-        MessageListener messageListener2 = msg -> listenerCalled2.set(true);
-        MessageListener messageListener3 = msg -> listenerCalled3.set(true);
+        Consumer<Message> messageListener1 = args -> listenerCalled1.set(true);
+        Consumer<Message> messageListener2 = args -> listenerCalled2.set(true);
+        Consumer<Message> messageListener3 = args -> listenerCalled3.set(true);
 
         MockupNetModule mockupNetModule = new MockupNetModule();
         SimpleConsole simpleConsole = new SimpleConsole(mockupNetModule);
         Connection connection = new MockupConnection(simpleConsole, "RemoteAddress", null);
 
-        simpleConsole.addMessageListener(messageListener1);
-        simpleConsole.addMessageListener(messageListener2);
-        simpleConsole.addMessageListener(messageListener3);
-        simpleConsole.supplyMessage(new SimpleMessage(connection, "Test"));
+        simpleConsole.messageReceivedEvent().addListener(messageListener1);
+        simpleConsole.messageReceivedEvent().addListener(messageListener2);
+        simpleConsole.messageReceivedEvent().addListener(messageListener3);
+        simpleConsole.messageReceivedEvent().trigger(new SimpleMessage(connection, "Test"));
 
         Assert.assertTrue(listenerCalled1.get());
         Assert.assertTrue(listenerCalled2.get());
@@ -93,15 +94,15 @@ public class SimpleConsoleTest {
     @Test
     public void testMessageListenerRemoval() throws Exception {
         AtomicBoolean listenerCalled = new AtomicBoolean();
-        MessageListener messageListener = msg -> listenerCalled.set(true);
+        Consumer<Message> messageListener = args -> listenerCalled.set(true);
 
         MockupNetModule mockupNetModule = new MockupNetModule();
         SimpleConsole simpleConsole = new SimpleConsole(mockupNetModule);
         Connection connection = new MockupConnection(simpleConsole, "RemoteAddress", null);
 
-        simpleConsole.addMessageListener(messageListener);
-        simpleConsole.removeMessageListener(messageListener);
-        simpleConsole.supplyMessage(new SimpleMessage(connection, "Test"));
+        simpleConsole.messageReceivedEvent().addListener(messageListener);
+        simpleConsole.messageReceivedEvent().removeListener(messageListener);
+        simpleConsole.messageReceivedEvent().trigger(new SimpleMessage(connection, "Test"));
 
         Assert.assertFalse(listenerCalled.get());
     }

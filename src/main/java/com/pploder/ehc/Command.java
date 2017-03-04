@@ -35,4 +35,24 @@ public interface Command {
      */
     Iterable<String> args();
 
+    /**
+     * Responds to the message with the given message content.
+     * This is a convenience method.
+     *
+     * @param messageContent The message content to send.
+     */
+    default void respond(MessageContent messageContent) {
+        getSource().respond(messageContent);
+    }
+
+    /**
+     * Responds to the messsage with the given character sequence.
+     * This is a convenience method.
+     *
+     * @param charSequence The character sequence to send.
+     */
+    default void respond(CharSequence charSequence) {
+        getSource().respond(charSequence);
+    }
+
 }
